@@ -1,0 +1,236 @@
+import { useState } from "react";
+import { CalculatorLayout } from "@/components/CalculatorLayout";
+import { InputField } from "@/components/InputField";
+import { ResultBox } from "@/components/ResultBox";
+import { StepByStep } from "@/components/StepByStep";
+
+type InputMode = "area" | "diametro";
+
+export default function ContinuidadePage() {
+  const [mode, setMode] = useState<InputMode>("diametro");
+  const [compressivel, setCompressivel] = useState(false);
+
+  const [A1, setA1] = useState("");
+  const [A2, setA2] = useState("");
+  const [D1, setD1] = useState("");
+  const [D2, setD2] = useState("");
+  const [V1, setV1] = useState("");
+  const [V2, setV2] = useState("");
+  const [rho1, setRho1] = useState("1000");
+  const [rho2, setRho2] = useState("1000");
+
+  const [incognita, setIncognita] = useState<"V1" | "V2" | "A1" | "A2">("V2");
+  const [result, setResult] = useState<{ value: number; label: string; steps: any[] } | null>(null);
+  const [showSteps, setShowSteps] = useState(false);
+
+  const areaFromDiam = (d: number) => Math.PI * (d / 2) ** 2;
+
+  const calculate = () => {
+    let a1: number, a2: number;
+
+    if (mode === "diametro") {
+      const d1 = parseFloat(D1);
+      const d2 = parseFloat(D2);
+      if ([d1, d2].some(isNaN)) return;
+      a1 = areaFromDiam(d1);
+      a2 = areaFromDiam(d2);
+    } else {
+      a1 = parseFloat(A1);
+      a2 = parseFloat(A2);
+      if ([a1, a2].some(isNaN)) return;
+    }
+
+    const v1 = parseFloat(V1);
+    const v2 = parseFloat(V2);
+    const density1 = parseFloat(rho1);
+    const density2 = parseFloat(rho2);
+
+    const steps: any[] = [];
+    let solved: number;
+    let solvedLabel: string;
+
+    if (mode === "diametro") {
+      const d1 = parseFloat(D1);
+      const d2 = parseFloat(D2);
+      steps.push({
+        label: "Conversão Diâmetro → Área",
+        formula: "A = π × (D/2)²",
+        result: `A₁ = π × (${d1}/2)² = ${a1.toFixed(6)} m² | A₂ = π × (${d2}/2)² = ${a2.toFixed(6)} m²`,
+      });
+    }
+
+    if (compressivel) {
+      steps.push({
+        label: "Equação da Continuidade (Compressível)",
+        formula: "ρ₁ × A₁ × V₁ = ρ₂ × A₂ × V₂",
+        result: `Com ρ₁ = ${density1} kg/m³ e ρ₂ = ${density2} kg/m³`,
+      });
+
+      switch (incognita) {
+        case "V2":
+          if (isNaN(v1)) return;
+          solved = (density1 * a1 * v1) / (density2 * a2);
+          solvedLabel = "Velocidade V₂";
+          break;
+        case "V1":
+          if (isNaN(v2)) return;
+          solved = (density2 * a2 * v2) / (density1 * a1);
+          solvedLabel = "Velocidade V₁";
+          break;
+        case "A1":
+          if (isNaN(v1) || isNaN(v2)) return;
+          solved = (density2 * a2 * v2) / (density1 * v1);
+          solvedLabel = "Área A₁";
+          break;
+        case "A2":
+          if (isNaN(v1) || isNaN(v2)) return;
+          solved = (density1 * a1 * v1) / (density2 * v2);
+          solvedLabel = "Área A₂";
+          break;
+        default:
+          return;
+      }
+    } else {
+      steps.push({
+        label: "Equação da Continuidade (Incompressível)",
+        formula: "A₁ × V₁ = A₂ × V₂ → Q = constante",
+        result: "Para fluido incompressível, a vazão volumétrica é constante.",
+      });
+
+      switch (incognita) {
+        case "V2":
+          if (isNaN(v1)) return;
+          solved = (a1 * v1) / a2;
+          solvedLabel = "Velocidade V₂";
+          break;
+        case "V1":
+          if (isNaN(v2)) return;
+          solved = (a2 * v2) / a1;
+          solvedLabel = "Velocidade V₁";
+          break;
+        case "A1":
+          if (isNaN(v1) || isNaN(v2)) return;
+          solved = (a2 * v2) / v1;
+          solvedLabel = "Área A₁";
+          break;
+        case "A2":
+          if (isNaN(v1) || isNaN(v2)) return;
+          solved = (a1 * v1) / v2;
+          solvedLabel = "Área A₂";
+          break;
+        default:
+          return;
+      }
+    }
+
+    const Q = a1 * (incognita === "V1" ? solved : v1);
+
+    steps.push({
+      label: "Substituição",
+      result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}`,
+    });
+
+    steps.push({
+      label: "Vazão Volumétrica",
+      formula: "Q = A × V",
+      result: `Q = ${Q.toFixed(6)} m³/s`,
+    });
+
+    setResult({ value: solved, label: solvedLabel!, steps });
+    setShowSteps(false);
+  };
+
+  const unit = (key: string) => (key.startsWith("V") ? "m/s" : "m²");
+
+  return (
+    <CalculatorLayout title="Equação da Continuidade">
+      <div className="flex gap-4 mb-4 flex-wrap">
+        <label className="flex items-center gap-2 text-xs font-heading uppercase tracking-wider text-foreground cursor-pointer">
+          <input
+            type="radio"
+            checked={mode === "diametro"}
+            onChange={() => setMode("diametro")}
+            className="accent-primary"
+          />
+          Entrada por Diâmetro
+        </label>
+        <label className="flex items-center gap-2 text-xs font-heading uppercase tracking-wider text-foreground cursor-pointer">
+          <input
+            type="radio"
+            checked={mode === "area"}
+            onChange={() => setMode("area")}
+            className="accent-primary"
+          />
+          Entrada por Área
+        </label>
+        <label className="flex items-center gap-2 text-xs font-heading uppercase tracking-wider text-foreground cursor-pointer ml-4">
+          <input
+            type="checkbox"
+            checked={compressivel}
+            onChange={(e) => setCompressivel(e.target.checked)}
+            className="accent-primary"
+          />
+          Fluido Compressível
+        </label>
+      </div>
+
+      <div className="mb-4">
+        <label className="text-xs font-heading text-foreground uppercase tracking-wider block mb-1">
+          Incógnita
+        </label>
+        <select
+          value={incognita}
+          onChange={(e) => { setIncognita(e.target.value as any); setResult(null); }}
+          className="border border-foreground bg-background px-3 py-2 text-sm font-heading text-foreground focus:border-primary focus:outline-none"
+        >
+          <option value="V2">Velocidade V₂</option>
+          <option value="V1">Velocidade V₁</option>
+          <option value="A1">Área A₁</option>
+          <option value="A2">Área A₂</option>
+        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {mode === "diametro" ? (
+          <>
+            {incognita !== "A1" && <InputField label="Diâmetro D₁" unit="m" value={D1} onChange={setD1} />}
+            {incognita !== "A2" && <InputField label="Diâmetro D₂" unit="m" value={D2} onChange={setD2} />}
+          </>
+        ) : (
+          <>
+            {incognita !== "A1" && <InputField label="Área A₁" unit="m²" value={A1} onChange={setA1} />}
+            {incognita !== "A2" && <InputField label="Área A₂" unit="m²" value={A2} onChange={setA2} />}
+          </>
+        )}
+        {incognita !== "V1" && <InputField label="Velocidade V₁" unit="m/s" value={V1} onChange={setV1} />}
+        {incognita !== "V2" && <InputField label="Velocidade V₂" unit="m/s" value={V2} onChange={setV2} />}
+        {compressivel && (
+          <>
+            <InputField label="Densidade ρ₁" unit="kg/m³" value={rho1} onChange={setRho1} />
+            <InputField label="Densidade ρ₂" unit="kg/m³" value={rho2} onChange={setRho2} />
+          </>
+        )}
+      </div>
+
+      <button
+        onClick={calculate}
+        className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8"
+      >
+        Calcular
+      </button>
+
+      {result && (
+        <div key={result.value}>
+          <ResultBox label={result.label} value={`${result.value.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}`} />
+          <button
+            onClick={() => setShowSteps(!showSteps)}
+            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
+          >
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
+        </div>
+      )}
+    </CalculatorLayout>
+  );
+}
