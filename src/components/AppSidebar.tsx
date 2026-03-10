@@ -4,6 +4,10 @@ const calculators = [
   { title: "Calculadora de Reynolds", path: "/" },
   { title: "Equação de Bernoulli", path: "/bernoulli" },
   { title: "Perda de Carga (Darcy-Weisbach)", path: "/darcy-weisbach" },
+  { title: "Equação da Continuidade", path: "/continuidade" },
+  { title: "Manometria (Stevin)", path: "/manometria" },
+  { title: "Empuxo (Arquimedes)", path: "/empuxo" },
+  { title: "NPSH e Cavitação", path: "/npsh" },
 ];
 
 export function AppSidebar() {

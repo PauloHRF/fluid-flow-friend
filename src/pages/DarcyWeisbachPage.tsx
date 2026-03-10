@@ -13,12 +13,8 @@ export default function DarcyWeisbachPage() {
   const [rho, setRho] = useState("1000");
   const [mu, setMu] = useState("0.001");
 
-  const [result, setResult] = useState<{
-    hf: number;
-    friction: number;
-    re: number;
-    steps: any[];
-  } | null>(null);
+  const [result, setResult] = useState<{ hf: number; friction: number; re: number; steps: any[] } | null>(null);
+  const [showSteps, setShowSteps] = useState(false);
 
   const g = 9.81;
 
@@ -36,12 +32,10 @@ export default function DarcyWeisbachPage() {
     const re = (density * velocity * diameter) / viscosity;
     const relRoughness = roughness / diameter;
 
-    // If f is provided, use it. Otherwise estimate with Colebrook (iterative)
     let friction: number;
     if (!isNaN(fVal) && fVal > 0) {
       friction = fVal;
     } else {
-      // Swamee-Jain approximation for turbulent flow
       if (re < 2300) {
         friction = 64 / re;
       } else {
@@ -54,42 +48,20 @@ export default function DarcyWeisbachPage() {
     const hf = friction * (length / diameter) * (velocity ** 2) / (2 * g);
 
     const steps = [
-      {
-        label: "Número de Reynolds",
-        formula: "Re = (ρ × v × D) / μ",
-        result: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity} = ${re.toFixed(2)}`,
-      },
-      {
-        label: "Rugosidade Relativa",
-        formula: "ε/D",
-        result: `ε/D = ${roughness} / ${diameter} = ${relRoughness.toFixed(6)}`,
-      },
-      {
-        label: "Fator de Atrito (f)",
-        formula: re < 2300 ? "f = 64 / Re (laminar)" : "Aprox. Swamee-Jain: f = 0.25 / [log₁₀(ε/3.7D + 5.74/Re⁰·⁹)]²",
-        result: !isNaN(fVal) && fVal > 0
-          ? `f = ${friction.toFixed(6)} (fornecido pelo usuário)`
-          : `f = ${friction.toFixed(6)} (calculado)`,
-      },
-      {
-        label: "Equação de Darcy-Weisbach",
-        formula: "hf = f × (L/D) × (v²/2g)",
-        result: `hf = ${friction.toFixed(6)} × (${length}/${diameter}) × (${velocity}²/(2×${g}))`,
-      },
-      {
-        label: "Resultado Final",
-        result: `hf = ${hf.toFixed(4)} m`,
-      },
+      { label: "Número de Reynolds", formula: "Re = (ρ × v × D) / μ", result: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity} = ${re.toFixed(2)}` },
+      { label: "Rugosidade Relativa", formula: "ε/D", result: `ε/D = ${roughness} / ${diameter} = ${relRoughness.toFixed(6)}` },
+      { label: "Fator de Atrito (f)", formula: re < 2300 ? "f = 64 / Re (laminar)" : "Aprox. Swamee-Jain", result: !isNaN(fVal) && fVal > 0 ? `f = ${friction.toFixed(6)} (fornecido)` : `f = ${friction.toFixed(6)} (calculado)` },
+      { label: "Equação de Darcy-Weisbach", formula: "hf = f × (L/D) × (v²/2g)", result: `hf = ${friction.toFixed(6)} × (${length}/${diameter}) × (${velocity}²/(2×${g}))` },
+      { label: "Resultado Final", result: `hf = ${hf.toFixed(4)} m` },
     ];
 
     setResult({ hf, friction, re, steps });
+    setShowSteps(false);
   };
 
   return (
     <CalculatorLayout title="Perda de Carga — Darcy-Weisbach">
-      <p className="text-xs font-body text-muted-foreground mb-4">
-        Deixe o fator de atrito (f) em branco para cálculo automático via Swamee-Jain.
-      </p>
+      <p className="text-xs font-body text-muted-foreground mb-4">Deixe o fator de atrito (f) em branco para cálculo automático via Swamee-Jain.</p>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <InputField label="Fator de Atrito (f)" unit="adimensional" value={f} onChange={setF} />
@@ -101,18 +73,16 @@ export default function DarcyWeisbachPage() {
         <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={setMu} />
       </div>
 
-      <button
-        onClick={calculate}
-        className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8"
-      >
-        Calcular
-      </button>
+      <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">Calcular</button>
 
       {result && (
         <div key={result.hf}>
           <ResultBox label="Perda de Carga (hf)" value={`${result.hf.toFixed(4)} m`} />
           <ResultBox label="Fator de Atrito (f)" value={result.friction.toFixed(6)} />
-          <StepByStep steps={result.steps} />
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
     </CalculatorLayout>

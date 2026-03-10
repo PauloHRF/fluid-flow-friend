@@ -16,6 +16,7 @@ export default function ReynoldsPage() {
   const [d, setD] = useState("");
   const [mu, setMu] = useState("");
   const [result, setResult] = useState<{ re: number; classification: string; steps: any[] } | null>(null);
+  const [showSteps, setShowSteps] = useState(false);
 
   const calculate = () => {
     const density = parseFloat(rho);
@@ -32,30 +33,14 @@ export default function ReynoldsPage() {
       re,
       classification,
       steps: [
-        {
-          label: "Fórmula",
-          formula: "Re = (ρ × v × D) / μ",
-          result: "Número de Reynolds é a razão entre forças inerciais e viscosas.",
-        },
-        {
-          label: "Substituição",
-          formula: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`,
-          result: `Re = ${(density * velocity * diameter).toFixed(4)} / ${viscosity}`,
-        },
-        {
-          label: "Resultado",
-          result: `Re = ${re.toFixed(2)}`,
-        },
-        {
-          label: "Classificação",
-          result: `Re < 2300 → Laminar | 2300 ≤ Re < 4000 → Transição | Re ≥ 4000 → Turbulento`,
-        },
-        {
-          label: "Laudo",
-          result: `Com Re = ${re.toFixed(2)}, o escoamento é classificado como: ${classification}`,
-        },
+        { label: "Fórmula", formula: "Re = (ρ × v × D) / μ", result: "Número de Reynolds é a razão entre forças inerciais e viscosas." },
+        { label: "Substituição", formula: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${(density * velocity * diameter).toFixed(4)} / ${viscosity}` },
+        { label: "Resultado", result: `Re = ${re.toFixed(2)}` },
+        { label: "Classificação", result: `Re < 2300 → Laminar | 2300 ≤ Re < 4000 → Transição | Re ≥ 4000 → Turbulento` },
+        { label: "Laudo", result: `Com Re = ${re.toFixed(2)}, o escoamento é classificado como: ${classification}` },
       ],
     });
+    setShowSteps(false);
   };
 
   return (
@@ -67,21 +52,17 @@ export default function ReynoldsPage() {
         <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={setMu} />
       </div>
 
-      <button
-        onClick={calculate}
-        className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8"
-      >
+      <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">
         Calcular
       </button>
 
       {result && (
         <div key={result.re}>
-          <ResultBox
-            label="Número de Reynolds"
-            value={result.re.toFixed(2)}
-            classification={result.classification}
-          />
-          <StepByStep steps={result.steps} />
+          <ResultBox label="Número de Reynolds" value={result.re.toFixed(2)} classification={result.classification} />
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
     </CalculatorLayout>
