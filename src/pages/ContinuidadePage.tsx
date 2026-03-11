@@ -231,6 +231,18 @@ export default function ContinuidadePage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          Entendendo a Equação da Continuidade e a Conservação da Massa
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Na mecânica dos fluidos, a Equação da Continuidade é a expressão matemática do princípio da conservação da massa para um volume de controle. Em termos práticos de engenharia, isso significa que a massa de fluido que entra em uma tubulação deve ser exatamente igual à massa que sai, assumindo que não há acúmulo no sistema. Para fluidos incompressíveis (como a água na maioria das aplicações prediais e industriais), a densidade permanece constante, o que simplifica a equação para a conservação da vazão volumétrica (Q = A × V).
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Reduções no diâmetro da tubulação (estreitamentos) forçam o fluido a aumentar a sua velocidade de escoamento para que a mesma vazão consiga passar pela seção transversal menor. Compreender essa relação entre área geométrica e campo de velocidade é o primeiro passo para dimensionar sistemas de recalque e prever o comportamento dinâmico de qualquer fluido em movimento.
+        </p>
+      </div>
     </CalculatorLayout>
   );
 }

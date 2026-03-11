@@ -151,6 +151,18 @@ export default function ManometriaPage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          Estática dos Fluidos e o Teorema de Stevin na Prática
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          A manometria é a técnica fundamental da estática dos fluidos utilizada para calcular variações de pressão em fluidos em repouso. O pilar desta análise é o Teorema de Stevin (Lei de Stevin), que estabelece que a pressão absoluta em um ponto de um fluido estático depende apenas da profundidade (altura da coluna de líquido), da densidade do fluido em questão e da aceleração da gravidade local (ΔP = ρ × g × h).
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Em problemas de manômetros diferenciais, tubos em U e piezômetros, a metodologia exige o percurso isobárico ao longo das interfaces dos fluidos. Quando o sentido da medição desce ao longo do tubo, a pressão hidrostática aumenta em proporção ao peso específico do fluido. Quando o caminho de medição sobe, a pressão diminui. O domínio dessa soma e subtração de cargas de pressão é vital para o correto diagnóstico de pressões em vasos de pressão, tanques industriais e redes de distribuição.
+        </p>
+      </div>
     </CalculatorLayout>
   );
 }

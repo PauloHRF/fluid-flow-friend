@@ -85,6 +85,18 @@ export default function DarcyWeisbachPage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          Cálculo da Perda de Carga e a Equação de Darcy-Weisbach
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Em qualquer sistema industrial de transporte de fluidos, o atrito entre o líquido e a parede interna da tubulação causa uma dissipação contínua de energia, conhecida como perda de carga distribuída. A Equação de Darcy-Weisbach é o método mais rigoroso e universalmente aceito na engenharia para quantificar essa perda. Ela relaciona a energia dissipada com o comprimento e o diâmetro do tubo, a velocidade média do escoamento e o fator de atrito (f).
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          A determinação exata do fator de atrito é o coração do cálculo. Para escoamentos laminares, ele depende exclusivamente do Número de Reynolds. No entanto, para escoamentos turbulentos, o fator de atrito torna-se uma função complexa que envolve tanto a turbulência do fluido quanto a rugosidade relativa do material do tubo (PVC, aço galvanizado, ferro fundido), sendo tipicamente resolvido através do Diagrama de Moody ou da Equação de Colebrook-White. O correto dimensionamento dessa perda de energia é o que define a potência mecânica exigida da bomba centrífuga da instalação.
+        </p>
+      </div>
     </CalculatorLayout>
   );
 }
