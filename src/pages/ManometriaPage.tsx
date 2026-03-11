@@ -163,18 +163,6 @@ export default function ManometriaPage() {
           Em problemas de manômetros diferenciais, tubos em U e piezômetros, a metodologia exige o percurso isobárico ao longo das interfaces dos fluidos. Quando o sentido da medição desce ao longo do tubo, a pressão hidrostática aumenta em proporção ao peso específico do fluido. Quando o caminho de medição sobe, a pressão diminui. O domínio dessa soma e subtração de cargas de pressão é vital para o correto diagnóstico de pressões em vasos de pressão, tanques industriais e redes de distribuição.
         </p>
       </div>
-        <div key={result.deltaP}>
-          <ResultBox label="Diferença de Pressão (ΔP)" value={`${result.deltaP.toFixed(2)} Pa`} />
-          <ResultBox label="Em kPa" value={`${(result.deltaP / 1000).toFixed(4)} kPa`} />
-          <button
-            onClick={() => setShowSteps(!showSteps)}
-            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
-          >
-            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
-          </button>
-          {showSteps && <StepByStep steps={result.steps} />}
-        </div>
-      )}
     </CalculatorLayout>
   );
 }

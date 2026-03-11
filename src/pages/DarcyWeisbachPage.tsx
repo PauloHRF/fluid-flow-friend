@@ -97,15 +97,6 @@ export default function DarcyWeisbachPage() {
           A determinação exata do fator de atrito é o coração do cálculo. Para escoamentos laminares, ele depende exclusivamente do Número de Reynolds. No entanto, para escoamentos turbulentos, o fator de atrito torna-se uma função complexa que envolve tanto a turbulência do fluido quanto a rugosidade relativa do material do tubo (PVC, aço galvanizado, ferro fundido), sendo tipicamente resolvido através do Diagrama de Moody ou da Equação de Colebrook-White. O correto dimensionamento dessa perda de energia é o que define a potência mecânica exigida da bomba centrífuga da instalação.
         </p>
       </div>
-        <div key={result.hf}>
-          <ResultBox label="Perda de Carga (hf)" value={`${result.hf.toFixed(4)} m`} />
-          <ResultBox label="Fator de Atrito (f)" value={result.friction.toFixed(6)} />
-          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
-            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
-          </button>
-          {showSteps && <StepByStep steps={result.steps} />}
-        </div>
-      )}
     </CalculatorLayout>
   );
 }

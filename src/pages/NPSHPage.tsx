@@ -170,19 +170,7 @@ export default function NPSHPage() {
                   : undefined
               }
             />
-          </div>
-          {result.npshr !== null && (
-            <ResultBox label="NPSH Requerido" value={`${result.npshr} m`} />
-          )}
-          <button
-            onClick={() => setShowSteps(!showSteps)}
-            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
-          >
-            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
-          </button>
-          {showSteps && <StepByStep steps={result.steps} />}
-        </div>
-      )}
+      </div>
     </CalculatorLayout>
   );
 }

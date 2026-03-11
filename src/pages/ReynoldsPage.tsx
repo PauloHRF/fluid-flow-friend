@@ -77,14 +77,6 @@ export default function ReynoldsPage() {
           A zona entre esses dois estados é conhecida como regime de transição. Na engenharia prática, calcular o Número de Reynolds é o passo obrigatório antes de dimensionar qualquer rede de tubulações, pois o fator de atrito e a perda de energia do sistema dependem inteiramente do regime de escoamento em que o fluido se encontra.
         </p>
       </div>
-        <div key={result.re}>
-          <ResultBox label="Número de Reynolds" value={result.re.toFixed(2)} classification={result.classification} />
-          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
-            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
-          </button>
-          {showSteps && <StepByStep steps={result.steps} />}
-        </div>
-      )}
     </CalculatorLayout>
   );
 }

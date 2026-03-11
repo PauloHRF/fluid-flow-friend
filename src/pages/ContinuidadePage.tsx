@@ -243,17 +243,6 @@ export default function ContinuidadePage() {
           Reduções no diâmetro da tubulação (estreitamentos) forçam o fluido a aumentar a sua velocidade de escoamento para que a mesma vazão consiga passar pela seção transversal menor. Compreender essa relação entre área geométrica e campo de velocidade é o primeiro passo para dimensionar sistemas de recalque e prever o comportamento dinâmico de qualquer fluido em movimento.
         </p>
       </div>
-        <div key={result.value}>
-          <ResultBox label={result.label} value={`${result.value.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}`} />
-          <button
-            onClick={() => setShowSteps(!showSteps)}
-            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
-          >
-            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
-          </button>
-          {showSteps && <StepByStep steps={result.steps} />}
-        </div>
-      )}
     </CalculatorLayout>
   );
 }
