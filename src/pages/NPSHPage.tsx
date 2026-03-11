@@ -145,6 +145,44 @@ export default function NPSHPage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          NPSH e a Prevenção do Fenômeno de Cavitação em Bombas Centrífugas
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          O dimensionamento de um sistema de bombeamento vai muito além de vencer a elevação do terreno. O Net Positive Suction Head (NPSH), ou Carga Líquida Positiva de Sucção, é o principal parâmetro de segurança contra a cavitação. A cavitação ocorre quando a pressão absoluta na linha de sucção do fluido cai abaixo da sua pressão de vapor na temperatura de operação, causando a ebulição instantânea e a formação de microbolhas de vapor. Quando essas bolhas atingem a zona de alta pressão dentro do rotor da bomba, elas colapsam violentamente, arrancando material do impelidor e destruindo o equipamento.
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Para garantir a integridade mecânica da bomba centrífuga, o engenheiro deve garantir matematicamente que a energia disponível na sucção (NPSH Disponível, que depende do arranjo físico da instalação, perdas de carga, pressão atmosférica e pressão de vapor) seja estritamente maior que o NPSH Requerido, um valor tabelado e fornecido pelo fabricante da bomba com base em testes de bancada.
+        </p>
+      </div>
+        <div key={result.npshd}>
+          <div className={cavitaClass ? "border-4 border-destructive p-2 mb-2 animate-pulse" : ""}>
+            <ResultBox
+              label="NPSH Disponível"
+              value={`${result.npshd.toFixed(4)} m`}
+              classification={
+                result.cavita === true
+                  ? "🔴 ALERTA: CAVITAÇÃO DETECTADA!"
+                  : result.cavita === false
+                  ? "🟢 Operação Segura"
+                  : undefined
+              }
+            />
+          </div>
+          {result.npshr !== null && (
+            <ResultBox label="NPSH Requerido" value={`${result.npshr} m`} />
+          )}
+          <button
+            onClick={() => setShowSteps(!showSteps)}
+            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
+          >
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
+        </div>
+      )}
     </CalculatorLayout>
   );
 }

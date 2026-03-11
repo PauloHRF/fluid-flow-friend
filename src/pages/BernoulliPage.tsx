@@ -101,6 +101,26 @@ export default function BernoulliPage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          A Equação de Bernoulli e a Conservação de Energia nos Fluidos
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          A Equação de Bernoulli é uma das formulações mais vitais na engenharia para descrever o comportamento dinâmico de fluidos. Ela é a expressão matemática direta do princípio da conservação da energia mecânica aplicada aos fluidos ideais. A equação demonstra que a energia total em um ponto de uma linha de corrente é constante, sendo composta pela soma de três parcelas: a energia de pressão (carga de pressão), a energia cinética (carga de velocidade) e a energia potencial gravitacional (carga de elevação).
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          Na prática de projeto, o Teorema de Bernoulli explica fenómenos críticos, como a queda de pressão em um estreitamento de tubo (Efeito Venturi) ou o funcionamento de tubos de Pitot para medição de velocidade aerodinâmica. Ao introduzir o termo de "perda de carga" na equação, o modelo adapta-se aos fluidos reais, permitindo calcular com precisão a energia dissipada pelo atrito durante o transporte de água, óleo ou gás.
+        </p>
+      </div>
+        <div key={result.value}>
+          <ResultBox label={result.label} value={`${result.value.toFixed(4)} ${fieldLabels[incognita].unit}`} />
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
+        </div>
+      )}
     </CalculatorLayout>
   );
 }

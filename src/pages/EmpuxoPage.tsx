@@ -203,6 +203,33 @@ export default function EmpuxoPage() {
           {showSteps && <StepByStep steps={result.steps} />}
         </div>
       )}
+
+      <div className="mt-12 border-t border-border pt-8 space-y-4">
+        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">
+          O Princípio de Arquimedes e a Força de Flutuação (Empuxo)
+        </h2>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          A força de empuxo é o fenômeno hidrostático que dita a estabilidade e a flutuação de corpos imersos em fluidos. Pelo Princípio de Arquimedes, qualquer objeto parcial ou totalmente submerso experimenta uma força vertical ascendente, cuja magnitude é exatamente igual ao peso do volume do fluido que foi deslocado pelo corpo.
+        </p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">
+          A análise de flutuabilidade exige o cruzamento direto de densidades. Se a densidade média do objeto for superior à densidade do fluido, a força peso supera o empuxo máximo possível, resultando no afundamento. Caso a densidade do corpo seja inferior à do líquido, ocorre a flutuação, e o sistema encontra equilíbrio quando a fração do volume submerso desloca a exata quantidade de fluido necessária para igualar a força peso total do corpo. Esse cálculo é a base da engenharia naval, dimensionamento de balsas, boias de nível e hidrômetros.
+        </p>
+      </div>
+        <div key={result.empuxo}>
+          <ResultBox
+            label="Força de Empuxo"
+            value={`${result.empuxo.toFixed(4)} N`}
+            classification={result.laudo}
+          />
+          <button
+            onClick={() => setShowSteps(!showSteps)}
+            className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4"
+          >
+            {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
+          </button>
+          {showSteps && <StepByStep steps={result.steps} />}
+        </div>
+      )}
     </CalculatorLayout>
   );
 }
