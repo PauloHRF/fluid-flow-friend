@@ -157,20 +157,6 @@ export default function NPSHPage() {
           Para garantir a integridade mecânica da bomba centrífuga, o engenheiro deve garantir matematicamente que a energia disponível na sucção (NPSH Disponível, que depende do arranjo físico da instalação, perdas de carga, pressão atmosférica e pressão de vapor) seja estritamente maior que o NPSH Requerido, um valor tabelado e fornecido pelo fabricante da bomba com base em testes de bancada.
         </p>
       </div>
-        <div key={result.npshd}>
-          <div className={cavitaClass ? "border-4 border-destructive p-2 mb-2 animate-pulse" : ""}>
-            <ResultBox
-              label="NPSH Disponível"
-              value={`${result.npshd.toFixed(4)} m`}
-              classification={
-                result.cavita === true
-                  ? "🔴 ALERTA: CAVITAÇÃO DETECTADA!"
-                  : result.cavita === false
-                  ? "🟢 Operação Segura"
-                  : undefined
-              }
-            />
-      </div>
     </CalculatorLayout>
   );
 }
