@@ -3,6 +3,7 @@ import { CalculatorLayout } from "@/components/CalculatorLayout";
 import { InputField } from "@/components/InputField";
 import { ResultBox } from "@/components/ResultBox";
 import { StepByStep } from "@/components/StepByStep";
+import { FluidPresets } from "@/components/FluidPresets";
 
 export default function DarcyWeisbachPage() {
   const [f, setF] = useState("");
@@ -12,13 +13,25 @@ export default function DarcyWeisbachPage() {
   const [epsilon, setEpsilon] = useState("");
   const [rho, setRho] = useState("1000");
   const [mu, setMu] = useState("0.001");
-
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ hf: number; friction: number; re: number; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
 
   const g = 9.81;
 
+  const clearError = (key: string) => setErrors((e) => ({ ...e, [key]: "" }));
+
   const calculate = () => {
+    const e: Record<string, string> = {};
+    if (!L || isNaN(parseFloat(L))) e.L = "Campo obrigatório";
+    if (!D || isNaN(parseFloat(D)) || parseFloat(D) === 0) e.D = "Deve ser > 0";
+    if (!v || isNaN(parseFloat(v))) e.v = "Campo obrigatório";
+    if (!epsilon || isNaN(parseFloat(epsilon))) e.epsilon = "Campo obrigatório";
+    if (!rho || isNaN(parseFloat(rho))) e.rho = "Campo obrigatório";
+    if (!mu || isNaN(parseFloat(mu)) || parseFloat(mu) === 0) e.mu = "Deve ser > 0";
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
+
     const fVal = parseFloat(f);
     const length = parseFloat(L);
     const diameter = parseFloat(D);
@@ -26,8 +39,6 @@ export default function DarcyWeisbachPage() {
     const roughness = parseFloat(epsilon);
     const density = parseFloat(rho);
     const viscosity = parseFloat(mu);
-
-    if ([length, diameter, velocity, roughness, density, viscosity].some(isNaN) || diameter === 0 || viscosity === 0) return;
 
     const re = (density * velocity * diameter) / viscosity;
     const relRoughness = roughness / diameter;
@@ -60,17 +71,18 @@ export default function DarcyWeisbachPage() {
   };
 
   return (
-    <CalculatorLayout title="Perda de Carga — Darcy-Weisbach">
+    <CalculatorLayout title="Perda de Carga — Darcy-Weisbach" metaDescription="Calcule a perda de carga distribuída pela equação de Darcy-Weisbach com fator de atrito automático via Swamee-Jain.">
+      <FluidPresets onSelect={(r, m) => { setRho(r); setMu(m); }} />
       <p className="text-xs font-body text-muted-foreground mb-4">Deixe o fator de atrito (f) em branco para cálculo automático via Swamee-Jain.</p>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <InputField label="Fator de Atrito (f)" unit="adimensional" value={f} onChange={setF} />
-        <InputField label="Comprimento (L)" unit="m" value={L} onChange={setL} />
-        <InputField label="Diâmetro (D)" unit="m" value={D} onChange={setD} />
-        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={setV} />
-        <InputField label="Rugosidade (ε)" unit="m" value={epsilon} onChange={setEpsilon} />
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={setRho} />
-        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={setMu} />
+        <InputField label="Comprimento (L)" unit="m" value={L} onChange={(v) => { setL(v); clearError("L"); }} error={errors.L} />
+        <InputField label="Diâmetro (D)" unit="m" value={D} onChange={(v) => { setD(v); clearError("D"); }} error={errors.D} />
+        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(val) => { setV(val); clearError("v"); }} error={errors.v} />
+        <InputField label="Rugosidade (ε)" unit="m" value={epsilon} onChange={(v) => { setEpsilon(v); clearError("epsilon"); }} error={errors.epsilon} />
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); clearError("rho"); }} error={errors.rho} />
+        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v) => { setMu(v); clearError("mu"); }} error={errors.mu} />
       </div>
 
       <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">Calcular</button>
@@ -79,7 +91,7 @@ export default function DarcyWeisbachPage() {
         <div key={result.hf}>
           <ResultBox label="Perda de Carga (hf)" value={`${result.hf.toFixed(4)} m`} />
           <ResultBox label="Fator de Atrito (f)" value={result.friction.toFixed(6)} />
-          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-input bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
             {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
           </button>
           {showSteps && <StepByStep steps={result.steps} />}
