@@ -22,23 +22,34 @@ export default function BernoulliPage() {
   const [values, setValues] = useState<Record<Field, string>>({
     P1: "", v1: "", z1: "", P2: "", v2: "", z2: "", hL: "0",
   });
+  const [rhoInput, setRhoInput] = useState("1000");
   const [incognita, setIncognita] = useState<Field>("P2");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ value: number; label: string; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
 
   const g = 9.81;
-  const rho = 1000;
 
-  const update = (field: Field, val: string) => setValues((prev) => ({ ...prev, [field]: val }));
+  const update = (field: Field, val: string) => {
+    setValues((prev) => ({ ...prev, [field]: val }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
 
   const calculate = () => {
+    const rho = parseFloat(rhoInput);
+    const e: Record<string, string> = {};
+    if (isNaN(rho) || rho <= 0) e.rho = "Deve ser > 0";
+
     const nums: Partial<Record<Field, number>> = {};
     for (const f of allFields) {
       if (f === incognita) continue;
       const n = parseFloat(values[f]);
-      if (isNaN(n)) return;
+      if (isNaN(n)) { e[f] = "Campo obrigatório"; continue; }
       nums[f] = n;
     }
+
+    setErrors(e);
+    if (Object.keys(e).length > 0) return;
 
     const P1 = nums.P1!, v1 = nums.v1!, z1 = nums.z1!;
     const P2 = nums.P2!, v2 = nums.v2!, z2 = nums.z2!;
@@ -62,7 +73,7 @@ export default function BernoulliPage() {
     }
 
     const steps = [
-      { label: "Equação de Bernoulli", formula, result: "Com ρ = 1000 kg/m³ e g = 9.81 m/s²" },
+      { label: "Equação de Bernoulli", formula, result: `Com ρ = ${rho} kg/m³ e g = 9.81 m/s²` },
       { label: "Valores Conhecidos", result: allFields.filter((f) => f !== incognita).map((f) => `${f} = ${values[f]} ${fieldLabels[f].unit}`).join(" | ") },
       { label: "Incógnita", result: `${incognita} = ?` },
       { label: "Isolando a incógnita", result: `Reorganizando a equação para resolver ${incognita}...` },
@@ -74,19 +85,22 @@ export default function BernoulliPage() {
   };
 
   return (
-    <CalculatorLayout title="Equação de Bernoulli">
-      <div className="mb-4">
-        <label className="text-xs font-heading text-foreground uppercase tracking-wider block mb-1">Incógnita (variável a calcular)</label>
-        <select value={incognita} onChange={(e) => { setIncognita(e.target.value as Field); setResult(null); }} className="border border-foreground bg-background px-3 py-2 text-sm font-heading text-foreground focus:border-primary focus:outline-none">
-          {allFields.map((f) => <option key={f} value={f}>{fieldLabels[f].label}</option>)}
-        </select>
+    <CalculatorLayout title="Equação de Bernoulli" metaDescription="Resolva a Equação de Bernoulli para qualquer variável: pressão, velocidade, cota ou perda de carga. Memorial de cálculo completo.">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="text-xs font-heading text-foreground uppercase tracking-wider block mb-1">Incógnita (variável a calcular)</label>
+          <select value={incognita} onChange={(e) => { setIncognita(e.target.value as Field); setResult(null); }} className="border border-input bg-background px-3 py-2 text-sm font-heading text-foreground focus:border-primary focus:outline-none w-full">
+            {allFields.map((f) => <option key={f} value={f}>{fieldLabels[f].label}</option>)}
+          </select>
+        </div>
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rhoInput} onChange={(v) => { setRhoInput(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} />
       </div>
 
-      <p className="text-xs font-body text-muted-foreground mb-4">ρ = 1000 kg/m³ (água) · g = 9.81 m/s²</p>
+      <p className="text-xs font-body text-muted-foreground mb-4">g = 9.81 m/s²</p>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {allFields.map((f) => (
-          <InputField key={f} label={fieldLabels[f].label} unit={fieldLabels[f].unit} value={f === incognita ? "" : values[f]} onChange={(val) => update(f, val)} disabled={f === incognita} />
+          <InputField key={f} label={fieldLabels[f].label} unit={fieldLabels[f].unit} value={f === incognita ? "" : values[f]} onChange={(val) => update(f, val)} disabled={f === incognita} error={errors[f]} />
         ))}
       </div>
 
@@ -95,7 +109,7 @@ export default function BernoulliPage() {
       {result && (
         <div key={result.value}>
           <ResultBox label={result.label} value={`${result.value.toFixed(4)} ${fieldLabels[incognita].unit}`} />
-          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-input bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
             {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
           </button>
           {showSteps && <StepByStep steps={result.steps} />}

@@ -3,6 +3,7 @@ import { CalculatorLayout } from "@/components/CalculatorLayout";
 import { InputField } from "@/components/InputField";
 import { ResultBox } from "@/components/ResultBox";
 import { StepByStep } from "@/components/StepByStep";
+import { FluidPresets } from "@/components/FluidPresets";
 
 function classifyReynolds(re: number): string {
   if (re < 2300) return "Escoamento Laminar";
@@ -15,16 +16,26 @@ export default function ReynoldsPage() {
   const [v, setV] = useState("");
   const [d, setD] = useState("");
   const [mu, setMu] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ re: number; classification: string; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
 
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!rho || isNaN(parseFloat(rho))) e.rho = "Campo obrigatório";
+    if (!v || isNaN(parseFloat(v))) e.v = "Campo obrigatório";
+    if (!d || isNaN(parseFloat(d))) e.d = "Campo obrigatório";
+    if (!mu || isNaN(parseFloat(mu)) || parseFloat(mu) === 0) e.mu = "Deve ser > 0";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const calculate = () => {
+    if (!validate()) return;
     const density = parseFloat(rho);
     const velocity = parseFloat(v);
     const diameter = parseFloat(d);
     const viscosity = parseFloat(mu);
-
-    if ([density, velocity, diameter, viscosity].some(isNaN) || viscosity === 0) return;
 
     const re = (density * velocity * diameter) / viscosity;
     const classification = classifyReynolds(re);
@@ -44,12 +55,14 @@ export default function ReynoldsPage() {
   };
 
   return (
-    <CalculatorLayout title="Calculadora de Reynolds">
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={setRho} />
-        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={setV} />
-        <InputField label="Diâmetro (D)" unit="m" value={d} onChange={setD} />
-        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={setMu} />
+    <CalculatorLayout title="Calculadora de Reynolds" metaDescription="Calcule o Número de Reynolds e identifique o regime de escoamento (laminar, transição ou turbulento) com memorial de cálculo passo a passo.">
+      <FluidPresets onSelect={(r, m) => { setRho(r); setMu(m); }} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} />
+        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(v2) => { setV(v2); setErrors((e) => ({ ...e, v: "" })); }} error={errors.v} />
+        <InputField label="Diâmetro (D)" unit="m" value={d} onChange={(v3) => { setD(v3); setErrors((e) => ({ ...e, d: "" })); }} error={errors.d} />
+        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v4) => { setMu(v4); setErrors((e) => ({ ...e, mu: "" })); }} error={errors.mu} />
       </div>
 
       <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">
@@ -59,7 +72,7 @@ export default function ReynoldsPage() {
       {result && (
         <div key={result.re}>
           <ResultBox label="Número de Reynolds" value={result.re.toFixed(2)} classification={result.classification} />
-          <button onClick={() => setShowSteps(!showSteps)} className="border border-foreground bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
+          <button onClick={() => setShowSteps(!showSteps)} className="border border-input bg-background text-foreground font-heading text-sm uppercase tracking-wider px-6 py-2 cursor-pointer mb-4">
             {showSteps ? "Ocultar" : "Mostrar"} Memorial de Cálculo
           </button>
           {showSteps && <StepByStep steps={result.steps} />}
