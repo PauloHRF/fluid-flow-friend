@@ -40,15 +40,19 @@ export default function ReynoldsPage() {
     const re = (density * velocity * diameter) / viscosity;
     const classification = classifyReynolds(re);
 
+    const numerator = density * velocity * diameter;
+
     setResult({
       re,
       classification,
       steps: [
-        { label: "Fórmula", formula: "Re = (ρ × v × D) / μ", result: "Número de Reynolds é a razão entre forças inerciais e viscosas." },
-        { label: "Substituição", formula: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${(density * velocity * diameter).toFixed(4)} / ${viscosity}` },
-        { label: "Resultado", result: `Re = ${re.toFixed(2)}` },
-        { label: "Classificação", result: `Re < 2300 → Laminar | 2300 ≤ Re < 4000 → Transição | Re ≥ 4000 → Turbulento` },
-        { label: "Laudo", result: `Com Re = ${re.toFixed(2)}, o escoamento é classificado como: ${classification}` },
+        { label: "Dados de Entrada", type: "info", result: `ρ = ${density} kg/m³ | v = ${velocity} m/s | D = ${diameter} m | μ = ${viscosity} Pa·s` },
+        { label: "Fórmula do Número de Reynolds", type: "formula", formula: "Re = (ρ × v × D) / μ", result: "Razão entre forças inerciais e forças viscosas do escoamento." },
+        { label: "Substituição dos Valores", type: "substitution", formula: "Re = (ρ × v × D) / μ", substitution: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${numerator.toFixed(4)} / ${viscosity}` },
+        { label: "Cálculo do Numerador", type: "calculation", formula: `ρ × v × D = ${density} × ${velocity} × ${diameter}`, result: `Numerador = ${numerator.toFixed(4)}` },
+        { label: "Divisão Final", type: "calculation", formula: `Re = ${numerator.toFixed(4)} / ${viscosity}`, result: `Re = ${re.toFixed(2)}` },
+        { label: "Critérios de Classificação", type: "info", result: `Re < 2300 → Laminar | 2300 ≤ Re < 4000 → Transição | Re ≥ 4000 → Turbulento` },
+        { label: "Laudo Final", type: "verdict", result: `Com Re = ${re.toFixed(2)}, o escoamento é classificado como: ${classification}` },
       ],
     });
     setShowSteps(false);

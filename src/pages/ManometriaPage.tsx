@@ -40,16 +40,22 @@ export default function ManometriaPage() {
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
-    const steps: any[] = [{ label: "Lei de Stevin", formula: "ΔP = ρ × g × h", result: "A pressão varia linearmente com a profundidade em um fluido estático." }];
+    const layerSummary = layers.map((l, i) => `Camada ${i+1}: ρ=${l.rho} kg/m³, h=${l.h} m, ${l.direction === "desce" ? "↓ desce" : "↑ sobe"}`).join(" | ");
+    const steps: any[] = [
+      { label: "Dados de Entrada", type: "info", result: layerSummary },
+      { label: "Lei de Stevin", type: "formula", formula: "ΔP = ρ × g × h", result: "A pressão varia linearmente com a profundidade em um fluido estático." },
+    ];
     let deltaP = 0;
     layers.forEach((layer, i) => {
       const rho = parseFloat(layer.rho); const h = parseFloat(layer.h);
       const contrib = rho * g * h;
       const sign = layer.direction === "desce" ? 1 : -1;
       deltaP += sign * contrib;
-      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, formula: `${sign > 0 ? "+" : "−"} ${rho} × ${g} × ${h}`, result: `${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
+      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, type: "substitution", formula: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ρ × g × h`, substitution: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${rho} × ${g} × ${h}`, result: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
     });
-    steps.push({ label: "Resultado — Diferença de Pressão", result: `ΔP = ${deltaP.toFixed(2)} Pa = ${(deltaP / 1000).toFixed(4)} kPa` });
+    const sumExpr = layers.map((layer, i) => { const rho = parseFloat(layer.rho); const h = parseFloat(layer.h); const contrib = rho * g * h; const sign = layer.direction === "desce" ? "+" : "−"; return `${sign} ${contrib.toFixed(2)}`; }).join(" ");
+    steps.push({ label: "Soma das Contribuições", type: "calculation", formula: `ΔP = ${sumExpr}`, result: `ΔP = ${deltaP.toFixed(2)} Pa` });
+    steps.push({ label: "Resultado Final", type: "result", result: `ΔP = ${deltaP.toFixed(2)} Pa = ${(deltaP / 1000).toFixed(4)} kPa` });
 
     setResult({ deltaP, steps });
     setShowSteps(false);

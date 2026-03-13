@@ -61,13 +61,17 @@ export default function ContinuidadePage() {
     let solved: number;
     let solvedLabel: string;
 
+    // Data inputs step
     if (mode === "diametro") {
       const d1 = parseFloat(D1); const d2 = parseFloat(D2);
-      steps.push({ label: "Conversão Diâmetro → Área", formula: "A = π × (D/2)²", result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
+      steps.push({ label: "Dados de Entrada", type: "info", result: mode === "diametro" ? `D₁ = ${D1} m | D₂ = ${D2} m` : `A₁ = ${A1} m² | A₂ = ${A2} m²` });
+      steps.push({ label: "Conversão Diâmetro → Área", type: "substitution", formula: "A = π × (D/2)²", substitution: `A₁ = π × (${d1}/2)² | A₂ = π × (${d2}/2)²`, result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
+    } else {
+      steps.push({ label: "Dados de Entrada", type: "info", result: `A₁ = ${A1} m² | A₂ = ${A2} m²` });
     }
 
     if (compressivel) {
-      steps.push({ label: "Equação da Continuidade (Compressível)", formula: "ρ₁ × A₁ × V₁ = ρ₂ × A₂ × V₂", result: `Com ρ₁ = ${density1} kg/m³ e ρ₂ = ${density2} kg/m³` });
+      steps.push({ label: "Equação da Continuidade (Compressível)", type: "formula", formula: "ρ₁ × A₁ × V₁ = ρ₂ × A₂ × V₂", result: `Conservação de massa com ρ₁ = ${density1} kg/m³ e ρ₂ = ${density2} kg/m³` });
       switch (incognita) {
         case "V2": solved = (density1 * a1! * v1) / (density2 * a2!); solvedLabel = "Velocidade V₂"; break;
         case "V1": solved = (density2 * a2! * v2) / (density1 * a1!); solvedLabel = "Velocidade V₁"; break;
@@ -75,8 +79,11 @@ export default function ContinuidadePage() {
         case "A2": solved = (density1 * a1! * v1) / (density2 * v2); solvedLabel = "Área A₂"; break;
         default: return;
       }
+      const numLabel = incognita === "V2" ? `${density1} × ${a1!.toFixed(6)} × ${v1}` : incognita === "V1" ? `${density2} × ${a2!.toFixed(6)} × ${v2}` : incognita === "A1" ? `${density2} × ${a2!.toFixed(6)} × ${v2}` : `${density1} × ${a1!.toFixed(6)} × ${v1}`;
+      const denLabel = incognita === "V2" ? `${density2} × ${a2!.toFixed(6)}` : incognita === "V1" ? `${density1} × ${a1!.toFixed(6)}` : incognita === "A1" ? `${density1} × ${v1}` : `${density2} × ${v2}`;
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incognita} = (numerador) / (denominador)`, substitution: `${incognita} = (${numLabel}) / (${denLabel})`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     } else {
-      steps.push({ label: "Equação da Continuidade (Incompressível)", formula: "A₁ × V₁ = A₂ × V₂ → Q = constante", result: "Para fluido incompressível, a vazão volumétrica é constante." });
+      steps.push({ label: "Equação da Continuidade (Incompressível)", type: "formula", formula: "A₁ × V₁ = A₂ × V₂ → Q = constante", result: "Para fluido incompressível, a vazão volumétrica é conservada." });
       switch (incognita) {
         case "V2": solved = (a1! * v1) / a2!; solvedLabel = "Velocidade V₂"; break;
         case "V1": solved = (a2! * v2) / a1!; solvedLabel = "Velocidade V₁"; break;
@@ -84,11 +91,14 @@ export default function ContinuidadePage() {
         case "A2": solved = (a1! * v1) / v2; solvedLabel = "Área A₂"; break;
         default: return;
       }
+      const numLabel = incognita === "V2" ? `${a1!.toFixed(6)} × ${v1}` : incognita === "V1" ? `${a2!.toFixed(6)} × ${v2}` : incognita === "A1" ? `${a2!.toFixed(6)} × ${v2}` : `${a1!.toFixed(6)} × ${v1}`;
+      const denLabel = incognita === "V2" ? `${a2!.toFixed(6)}` : incognita === "V1" ? `${a1!.toFixed(6)}` : incognita === "A1" ? `${v1}` : `${v2}`;
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incognita} = (A × V) / (...)`, substitution: `${incognita} = ${numLabel} / ${denLabel}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     }
 
     const Q = a1! * (incognita === "V1" ? solved : v1);
-    steps.push({ label: "Substituição", result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
-    steps.push({ label: "Vazão Volumétrica", formula: "Q = A × V", result: `Q = ${Q.toFixed(6)} m³/s` });
+    steps.push({ label: "Vazão Volumétrica", type: "calculation", formula: "Q = A × V", substitution: `Q = ${a1!.toFixed(6)} × ${incognita === "V1" ? solved.toFixed(6) : v1}`, result: `Q = ${Q.toFixed(6)} m³/s` });
+    steps.push({ label: "Resultado Final", type: "result", result: `${solvedLabel!} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"} | Vazão Q = ${Q.toFixed(6)} m³/s` });
 
     setResult({ value: solved, label: solvedLabel!, steps });
     setShowSteps(false);

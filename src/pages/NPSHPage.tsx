@@ -50,19 +50,20 @@ export default function NPSHPage() {
     const npshd = pressureHead - hs - hp + velocityHead;
 
     const steps: any[] = [
-      { label: "Fórmula do NPSH Disponível", formula: "NPSHd = (Patm − Pvapor)/(ρg) − hs − hperdas + v²/(2g)", result: "Cálculo da energia líquida positiva de sucção disponível." },
-      { label: "Carga de Pressão", formula: "(Patm − Pvapor) / (ρ × g)", result: `(${patm} − ${pvap}) / (${density} × ${g}) = ${pressureHead.toFixed(4)} m` },
-      { label: "Altura de Sucção", result: `hs = ${hs} m` },
-      { label: "Perdas na Sucção", result: `hperdas = ${hp} m` },
-      { label: "Carga de Velocidade", formula: "v² / (2g)", result: `${vs}² / (2 × ${g}) = ${velocityHead.toFixed(4)} m` },
-      { label: "NPSH Disponível", formula: `${pressureHead.toFixed(4)} − ${hs} − ${hp} + ${velocityHead.toFixed(4)}`, result: `NPSHd = ${npshd.toFixed(4)} m` },
+      { label: "Dados de Entrada", type: "info", result: `Patm = ${patm} Pa | Pvapor = ${pvap} Pa | hs = ${hs} m | hperdas = ${hp} m | v = ${vs} m/s | ρ = ${density} kg/m³` },
+      { label: "Fórmula do NPSH Disponível", type: "formula", formula: "NPSHd = (Patm − Pvapor)/(ρg) − hs − hperdas + v²/(2g)", result: "Energia líquida positiva de sucção disponível na instalação." },
+      { label: "Carga de Pressão", type: "substitution", formula: "(Patm − Pvapor) / (ρ × g)", substitution: `(${patm} − ${pvap}) / (${density} × ${g})`, result: `Carga de pressão = ${pressureHead.toFixed(4)} m` },
+      { label: "Altura Geométrica de Sucção", type: "info", result: `hs = ${hs} m (distância vertical entre reservatório e bomba)` },
+      { label: "Perdas de Carga na Sucção", type: "info", result: `hperdas = ${hp} m (perdas distribuídas + localizadas na tubulação de sucção)` },
+      { label: "Carga de Velocidade", type: "substitution", formula: "v² / (2g)", substitution: `${vs}² / (2 × ${g})`, result: `Carga de velocidade = ${velocityHead.toFixed(4)} m` },
+      { label: "Cálculo do NPSH Disponível", type: "substitution", formula: "NPSHd = carga_pressão − hs − hperdas + carga_velocidade", substitution: `NPSHd = ${pressureHead.toFixed(4)} − ${hs} − ${hp} + ${velocityHead.toFixed(4)}`, result: `NPSHd = ${npshd.toFixed(4)} m` },
     ];
 
     let cavita: boolean | null = null;
     if (hasNPSHr) {
       cavita = npshd < npshr;
-      steps.push({ label: "Comparação NPSHd vs NPSHr", result: `NPSHd (${npshd.toFixed(4)} m) ${cavita ? "<" : "≥"} NPSHr (${npshr} m)` });
-      steps.push({ label: "⚠️ LAUDO FINAL", result: cavita ? "🔴 ALERTA: A bomba VAI CAVITAR! NPSHd < NPSHr." : "🟢 SEGURO: NPSHd ≥ NPSHr. A bomba opera sem cavitação." });
+      steps.push({ label: "Comparação NPSHd vs NPSHr", type: "info", result: `NPSHd (${npshd.toFixed(4)} m) ${cavita ? "<" : "≥"} NPSHr (${npshr} m)` });
+      steps.push({ label: "Laudo Final", type: "verdict", result: cavita ? "🔴 ALERTA: A bomba VAI CAVITAR! NPSHd < NPSHr." : "🟢 SEGURO: NPSHd ≥ NPSHr. A bomba opera sem cavitação." });
     }
 
     setResult({ npshd, npshr: hasNPSHr ? npshr : null, cavita, steps });

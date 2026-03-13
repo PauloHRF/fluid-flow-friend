@@ -72,12 +72,25 @@ export default function BernoulliPage() {
       default: return;
     }
 
+    // Compute intermediate heads for display
+    const knownFields = allFields.filter((f) => f !== incognita);
+    const pHeadKnown = (f: string) => {
+      if (f === "P1" || f === "P2") return `${values[f]} / (${rho} × ${g})`;
+      if (f === "v1" || f === "v2") return `${values[f]}² / (2 × ${g})`;
+      return `${values[f]}`;
+    };
+
+    const lhsTerms = ["P1", "v1", "z1"].filter(f => f !== incognita).map(f => `${f}=${values[f]}`).join(", ");
+    const rhsTerms = ["P2", "v2", "z2", "hL"].filter(f => f !== incognita).map(f => `${f}=${values[f]}`).join(", ");
+
     const steps = [
-      { label: "Equação de Bernoulli", formula, result: `Com ρ = ${rho} kg/m³ e g = 9.81 m/s²` },
-      { label: "Valores Conhecidos", result: allFields.filter((f) => f !== incognita).map((f) => `${f} = ${values[f]} ${fieldLabels[f].unit}`).join(" | ") },
-      { label: "Incógnita", result: `${incognita} = ?` },
-      { label: "Isolando a incógnita", result: `Reorganizando a equação para resolver ${incognita}...` },
-      { label: "Resultado", result: `${incognita} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
+      { label: "Dados de Entrada", type: "info" as const, result: knownFields.map((f) => `${f} = ${values[f]} ${fieldLabels[f].unit}`).join(" | ") },
+      { label: "Equação de Bernoulli Generalizada", type: "formula" as const, formula, result: `Conservação de energia ao longo de uma linha de corrente, com ρ = ${rho} kg/m³ e g = ${g} m/s²` },
+      { label: "Identificação da Incógnita", type: "info" as const, result: `Variável a determinar: ${incognita} (${fieldLabels[incognita].label})` },
+      { label: "Substituição — Lado Esquerdo (Ponto 1)", type: "substitution" as const, formula: "H₁ = P₁/(ρg) + v₁²/(2g) + z₁", substitution: lhsTerms, result: incognita.endsWith("1") ? `Contém a incógnita ${incognita}` : `Lado esquerdo com valores conhecidos` },
+      { label: "Substituição — Lado Direito (Ponto 2)", type: "substitution" as const, formula: "H₂ = P₂/(ρg) + v₂²/(2g) + z₂ + hL", substitution: rhsTerms, result: incognita.endsWith("2") || incognita === "hL" ? `Contém a incógnita ${incognita}` : `Lado direito com valores conhecidos` },
+      { label: "Isolamento e Resolução", type: "calculation" as const, formula: `Isolando ${incognita} na equação de Bernoulli`, result: `${incognita} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
+      { label: "Resultado Final", type: "result" as const, result: `${fieldLabels[incognita].label} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
     ];
 
     setResult({ value: solved, label: fieldLabels[incognita].label, steps });
