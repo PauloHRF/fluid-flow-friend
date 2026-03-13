@@ -59,11 +59,12 @@ export default function DarcyWeisbachPage() {
     const hf = friction * (length / diameter) * (velocity ** 2) / (2 * g);
 
     const steps = [
-      { label: "Número de Reynolds", formula: "Re = (ρ × v × D) / μ", result: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity} = ${re.toFixed(2)}` },
-      { label: "Rugosidade Relativa", formula: "ε/D", result: `ε/D = ${roughness} / ${diameter} = ${relRoughness.toFixed(6)}` },
-      { label: "Fator de Atrito (f)", formula: re < 2300 ? "f = 64 / Re (laminar)" : "Aprox. Swamee-Jain", result: !isNaN(fVal) && fVal > 0 ? `f = ${friction.toFixed(6)} (fornecido)` : `f = ${friction.toFixed(6)} (calculado)` },
-      { label: "Equação de Darcy-Weisbach", formula: "hf = f × (L/D) × (v²/2g)", result: `hf = ${friction.toFixed(6)} × (${length}/${diameter}) × (${velocity}²/(2×${g}))` },
-      { label: "Resultado Final", result: `hf = ${hf.toFixed(4)} m` },
+      { label: "Dados de Entrada", type: "info" as const, result: `ρ = ${density} kg/m³ | v = ${velocity} m/s | D = ${diameter} m | L = ${length} m | ε = ${roughness} m | μ = ${viscosity} Pa·s` },
+      { label: "Número de Reynolds", type: "substitution" as const, formula: "Re = (ρ × v × D) / μ", substitution: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${re.toFixed(2)} → ${re < 2300 ? "Laminar" : re < 4000 ? "Transição" : "Turbulento"}` },
+      { label: "Rugosidade Relativa", type: "substitution" as const, formula: "ε/D", substitution: `ε/D = ${roughness} / ${diameter}`, result: `ε/D = ${relRoughness.toFixed(6)}` },
+      { label: "Fator de Atrito (f)", type: "calculation" as const, formula: re < 2300 ? "f = 64 / Re (regime laminar)" : "Aprox. Swamee-Jain (regime turbulento)", substitution: !isNaN(fVal) && fVal > 0 ? `f = ${fVal} (valor fornecido pelo usuário)` : re < 2300 ? `f = 64 / ${re.toFixed(2)}` : `f = 0.25 / [log₁₀(ε/3.7D + 5.74/Re⁰·⁹)]²`, result: `f = ${friction.toFixed(6)}` },
+      { label: "Equação de Darcy-Weisbach", type: "substitution" as const, formula: "hf = f × (L/D) × (v²/2g)", substitution: `hf = ${friction.toFixed(6)} × (${length}/${diameter}) × (${velocity}²/(2×${g}))`, result: `hf = ${friction.toFixed(6)} × ${(length / diameter).toFixed(4)} × ${(velocity ** 2 / (2 * g)).toFixed(6)}` },
+      { label: "Resultado Final", type: "result" as const, result: `hf = ${hf.toFixed(4)} m (perda de carga distribuída)` },
     ];
 
     setResult({ hf, friction, re, steps });

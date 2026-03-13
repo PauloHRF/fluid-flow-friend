@@ -44,11 +44,13 @@ export default function EmpuxoPage() {
     const steps: any[] = [];
     let vol: number;
 
+    steps.push({ label: "Dados de Entrada", type: "info", result: `Massa = ${m} kg | ρ_fluido = ${rhoF} kg/m³ | g = ${g} m/s²` });
+
     switch (shape) {
-      case "cilindro": { const r = parseFloat(raio); const h = parseFloat(altura); vol = Math.PI * r ** 2 * h; steps.push({ label: "Volume do Cilindro", formula: "V = π × r² × h", result: `V = ${vol.toFixed(6)} m³` }); break; }
-      case "esfera": { const r = parseFloat(raio); vol = (4 / 3) * Math.PI * r ** 3; steps.push({ label: "Volume da Esfera", formula: "V = (4/3) × π × r³", result: `V = ${vol.toFixed(6)} m³` }); break; }
-      case "paralelepipedo": { const c = parseFloat(comprimento); const l = parseFloat(largura); const h = parseFloat(altura); vol = c * l * h; steps.push({ label: "Volume do Paralelepípedo", formula: "V = C × L × H", result: `V = ${vol.toFixed(6)} m³` }); break; }
-      default: { vol = parseFloat(volume); steps.push({ label: "Volume informado", result: `V = ${vol} m³` }); }
+      case "cilindro": { const r = parseFloat(raio); const h = parseFloat(altura); vol = Math.PI * r ** 2 * h; steps.push({ label: "Volume do Cilindro", type: "substitution", formula: "V = π × r² × h", substitution: `V = π × ${r}² × ${h}`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      case "esfera": { const r = parseFloat(raio); vol = (4 / 3) * Math.PI * r ** 3; steps.push({ label: "Volume da Esfera", type: "substitution", formula: "V = (4/3) × π × r³", substitution: `V = (4/3) × π × ${r}³`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      case "paralelepipedo": { const c = parseFloat(comprimento); const l = parseFloat(largura); const h = parseFloat(altura); vol = c * l * h; steps.push({ label: "Volume do Paralelepípedo", type: "substitution", formula: "V = C × L × H", substitution: `V = ${c} × ${l} × ${h}`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      default: { vol = parseFloat(volume); steps.push({ label: "Volume Informado", type: "info", result: `V = ${vol} m³` }); }
     }
 
     const peso = m * g;
@@ -61,12 +63,12 @@ export default function EmpuxoPage() {
 
     const empuxo = rhoF * volSubmerso * g;
 
-    steps.push({ label: "Peso do Objeto", formula: "W = m × g", result: `W = ${peso.toFixed(4)} N` });
-    steps.push({ label: "Densidade do Objeto", formula: "ρ_obj = m / V", result: `ρ_obj = ${rhoObj.toFixed(2)} kg/m³` });
-    steps.push({ label: "Comparação de Densidades", result: `ρ_obj (${rhoObj.toFixed(2)}) ${rhoObj < rhoF ? "<" : rhoObj === rhoF ? "=" : ">"} ρ_fluido (${rhoF})` });
-    steps.push({ label: "Volume Submerso", formula: rhoObj < rhoF ? "V_sub = m / ρ_fluido" : "V_sub = V (totalmente submerso)", result: `V_sub = ${volSubmerso.toFixed(6)} m³` });
-    steps.push({ label: "Força de Empuxo", formula: "E = ρ_fluido × V_sub × g", result: `E = ${empuxo.toFixed(4)} N` });
-    steps.push({ label: "Laudo Final", result: laudo });
+    steps.push({ label: "Peso do Objeto", type: "substitution", formula: "W = m × g", substitution: `W = ${m} × ${g}`, result: `W = ${peso.toFixed(4)} N` });
+    steps.push({ label: "Densidade do Objeto", type: "substitution", formula: "ρ_obj = m / V", substitution: `ρ_obj = ${m} / ${vol.toFixed(6)}`, result: `ρ_obj = ${rhoObj.toFixed(2)} kg/m³` });
+    steps.push({ label: "Comparação de Densidades", type: "info", result: `ρ_obj (${rhoObj.toFixed(2)}) ${rhoObj < rhoF ? "<" : rhoObj === rhoF ? "=" : ">"} ρ_fluido (${rhoF}) → ${rhoObj < rhoF ? "Objeto menos denso que o fluido" : rhoObj === rhoF ? "Densidades iguais" : "Objeto mais denso que o fluido"}` });
+    steps.push({ label: "Volume Submerso", type: "substitution", formula: rhoObj < rhoF ? "V_sub = m / ρ_fluido" : "V_sub = V (totalmente submerso)", substitution: rhoObj < rhoF ? `V_sub = ${m} / ${rhoF}` : `V_sub = ${vol.toFixed(6)}`, result: `V_sub = ${volSubmerso.toFixed(6)} m³` });
+    steps.push({ label: "Força de Empuxo (Princípio de Arquimedes)", type: "substitution", formula: "E = ρ_fluido × V_sub × g", substitution: `E = ${rhoF} × ${volSubmerso.toFixed(6)} × ${g}`, result: `E = ${empuxo.toFixed(4)} N` });
+    steps.push({ label: "Laudo Final", type: "verdict", result: laudo });
 
     setResult({ empuxo, peso, laudo, volSubmerso, steps });
     setShowSteps(false);
