@@ -56,7 +56,6 @@ export default function BernoulliPage() {
     const hL = nums.hL ?? 0;
 
     let solved: number;
-    const formula = "P₁/(ρg) + v₁²/(2g) + z₁ = P₂/(ρg) + v₂²/(2g) + z₂ + hL";
 
     const computeLHS = (p1: number, vel1: number, zz1: number) => p1 / (rho * g) + (vel1 ** 2) / (2 * g) + zz1;
     const computeRHS = (p2: number, vel2: number, zz2: number, hl: number) => p2 / (rho * g) + (vel2 ** 2) / (2 * g) + zz2 + hl;
@@ -72,24 +71,17 @@ export default function BernoulliPage() {
       default: return;
     }
 
-    // Compute intermediate heads for display
     const knownFields = allFields.filter((f) => f !== incognita);
-    const pHeadKnown = (f: string) => {
-      if (f === "P1" || f === "P2") return `${values[f]} / (${rho} × ${g})`;
-      if (f === "v1" || f === "v2") return `${values[f]}² / (2 × ${g})`;
-      return `${values[f]}`;
-    };
 
-    const lhsTerms = ["P1", "v1", "z1"].filter(f => f !== incognita).map(f => `${f}=${values[f]}`).join(", ");
-    const rhsTerms = ["P2", "v2", "z2", "hL"].filter(f => f !== incognita).map(f => `${f}=${values[f]}`).join(", ");
+    const fieldLatex: Record<Field, string> = { P1: "P_1", v1: "v_1", z1: "z_1", P2: "P_2", v2: "v_2", z2: "z_2", hL: "h_L" };
 
     const steps = [
       { label: "Dados de Entrada", type: "info" as const, result: knownFields.map((f) => `${f} = ${values[f]} ${fieldLabels[f].unit}`).join(" | ") },
-      { label: "Equação de Bernoulli Generalizada", type: "formula" as const, formula, result: `Conservação de energia ao longo de uma linha de corrente, com ρ = ${rho} kg/m³ e g = ${g} m/s²` },
+      { label: "Equação de Bernoulli Generalizada", type: "formula" as const, formula: `\\frac{P_1}{\\rho g} + \\frac{v_1^2}{2g} + z_1 = \\frac{P_2}{\\rho g} + \\frac{v_2^2}{2g} + z_2 + h_L`, result: `Conservação de energia ao longo de uma linha de corrente, com ρ = ${rho} kg/m³ e g = ${g} m/s²` },
       { label: "Identificação da Incógnita", type: "info" as const, result: `Variável a determinar: ${incognita} (${fieldLabels[incognita].label})` },
-      { label: "Substituição — Lado Esquerdo (Ponto 1)", type: "substitution" as const, formula: "H₁ = P₁/(ρg) + v₁²/(2g) + z₁", substitution: lhsTerms, result: incognita.endsWith("1") ? `Contém a incógnita ${incognita}` : `Lado esquerdo com valores conhecidos` },
-      { label: "Substituição — Lado Direito (Ponto 2)", type: "substitution" as const, formula: "H₂ = P₂/(ρg) + v₂²/(2g) + z₂ + hL", substitution: rhsTerms, result: incognita.endsWith("2") || incognita === "hL" ? `Contém a incógnita ${incognita}` : `Lado direito com valores conhecidos` },
-      { label: "Isolamento e Resolução", type: "calculation" as const, formula: `Isolando ${incognita} na equação de Bernoulli`, result: `${incognita} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
+      { label: "Substituição — Lado Esquerdo (Ponto 1)", type: "substitution" as const, formula: `H_1 = \\frac{P_1}{\\rho g} + \\frac{v_1^2}{2g} + z_1`, substitution: incognita.endsWith("1") ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${values.P1 || "?"}}{${rho} \\times ${g}} + \\frac{${values.v1 || "?"}^2}{2 \\times ${g}} + ${values.z1 || "?"}`, result: incognita.endsWith("1") ? `Contém a incógnita ${incognita}` : `Lado esquerdo com valores conhecidos` },
+      { label: "Substituição — Lado Direito (Ponto 2)", type: "substitution" as const, formula: `H_2 = \\frac{P_2}{\\rho g} + \\frac{v_2^2}{2g} + z_2 + h_L`, substitution: incognita.endsWith("2") || incognita === "hL" ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${values.P2 || "?"}}{${rho} \\times ${g}} + \\frac{${values.v2 || "?"}^2}{2 \\times ${g}} + ${values.z2 || "?"} + ${values.hL || "0"}`, result: incognita.endsWith("2") || incognita === "hL" ? `Contém a incógnita ${incognita}` : `Lado direito com valores conhecidos` },
+      { label: "Isolamento e Resolução", type: "calculation" as const, formula: `${fieldLatex[incognita]} = \\text{?}`, result: `${incognita} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
       { label: "Resultado Final", type: "result" as const, result: `${fieldLabels[incognita].label} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
     ];
 
@@ -134,10 +126,10 @@ export default function BernoulliPage() {
           A Equação de Bernoulli e a Conservação de Energia nos Fluidos
         </h2>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">
-          A Equação de Bernoulli é uma das formulações mais vitais na engenharia para descrever o comportamento dinâmico de fluidos. Ela é a expressão matemática direta do princípio da conservação da energia mecânica aplicada aos fluidos ideais. A equação demonstra que a energia total em um ponto de uma linha de corrente é constante, sendo composta pela soma de três parcelas: a energia de pressão (carga de pressão), a energia cinética (carga de velocidade) e a energia potencial gravitacional (carga de elevação).
+          A Equação de Bernoulli é uma das formulações mais vitais na engenharia para descrever o comportamento dinâmico de fluidos. Ela é a expressão matemática direta do princípio da conservação da energia mecânica aplicada aos fluidos ideais.
         </p>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">
-          Na prática de projeto, o Teorema de Bernoulli explica fenómenos críticos, como a queda de pressão em um estreitamento de tubo (Efeito Venturi) ou o funcionamento de tubos de Pitot para medição de velocidade aerodinâmica. Ao introduzir o termo de "perda de carga" na equação, o modelo adapta-se aos fluidos reais, permitindo calcular com precisão a energia dissipada pelo atrito durante o transporte de água, óleo ou gás.
+          Na prática de projeto, o Teorema de Bernoulli explica fenómenos críticos, como a queda de pressão em um estreitamento de tubo (Efeito Venturi) ou o funcionamento de tubos de Pitot para medição de velocidade aerodinâmica.
         </p>
       </div>
     </CalculatorLayout>

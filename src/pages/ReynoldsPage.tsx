@@ -39,7 +39,6 @@ export default function ReynoldsPage() {
 
     const re = (density * velocity * diameter) / viscosity;
     const classification = classifyReynolds(re);
-
     const numerator = density * velocity * diameter;
 
     setResult({
@@ -47,10 +46,10 @@ export default function ReynoldsPage() {
       classification,
       steps: [
         { label: "Dados de Entrada", type: "info", result: `ρ = ${density} kg/m³ | v = ${velocity} m/s | D = ${diameter} m | μ = ${viscosity} Pa·s` },
-        { label: "Fórmula do Número de Reynolds", type: "formula", formula: "Re = (ρ × v × D) / μ", result: "Razão entre forças inerciais e forças viscosas do escoamento." },
-        { label: "Substituição dos Valores", type: "substitution", formula: "Re = (ρ × v × D) / μ", substitution: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${numerator.toFixed(4)} / ${viscosity}` },
-        { label: "Cálculo do Numerador", type: "calculation", formula: `ρ × v × D = ${density} × ${velocity} × ${diameter}`, result: `Numerador = ${numerator.toFixed(4)}` },
-        { label: "Divisão Final", type: "calculation", formula: `Re = ${numerator.toFixed(4)} / ${viscosity}`, result: `Re = ${re.toFixed(2)}` },
+        { label: "Fórmula do Número de Reynolds", type: "formula", formula: `\\text{Re} = \\frac{\\rho \\cdot v \\cdot D}{\\mu}`, result: "Razão entre forças inerciais e forças viscosas do escoamento." },
+        { label: "Substituição dos Valores", type: "substitution", formula: `\\text{Re} = \\frac{\\rho \\cdot v \\cdot D}{\\mu}`, substitution: `\\text{Re} = \\frac{${density} \\times ${velocity} \\times ${diameter}}{${viscosity}}`, result: `Re = ${numerator.toFixed(4)} / ${viscosity}` },
+        { label: "Cálculo do Numerador", type: "calculation", formula: `\\rho \\cdot v \\cdot D = ${density} \\times ${velocity} \\times ${diameter}`, result: `Numerador = ${numerator.toFixed(4)}` },
+        { label: "Divisão Final", type: "calculation", formula: `\\text{Re} = \\frac{${numerator.toFixed(4)}}{${viscosity}}`, result: `Re = ${re.toFixed(2)}` },
         { label: "Critérios de Classificação", type: "info", result: `Re < 2300 → Laminar | 2300 ≤ Re < 4000 → Transição | Re ≥ 4000 → Turbulento` },
         { label: "Laudo Final", type: "verdict", result: `Com Re = ${re.toFixed(2)}, o escoamento é classificado como: ${classification}` },
       ],

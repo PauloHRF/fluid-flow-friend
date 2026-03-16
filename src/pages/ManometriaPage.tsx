@@ -43,7 +43,7 @@ export default function ManometriaPage() {
     const layerSummary = layers.map((l, i) => `Camada ${i+1}: ρ=${l.rho} kg/m³, h=${l.h} m, ${l.direction === "desce" ? "↓ desce" : "↑ sobe"}`).join(" | ");
     const steps: any[] = [
       { label: "Dados de Entrada", type: "info", result: layerSummary },
-      { label: "Lei de Stevin", type: "formula", formula: "ΔP = ρ × g × h", result: "A pressão varia linearmente com a profundidade em um fluido estático." },
+      { label: "Lei de Stevin", type: "formula", formula: `\\Delta P = \\rho \\cdot g \\cdot h`, result: "A pressão varia linearmente com a profundidade em um fluido estático." },
     ];
     let deltaP = 0;
     layers.forEach((layer, i) => {
@@ -51,10 +51,11 @@ export default function ManometriaPage() {
       const contrib = rho * g * h;
       const sign = layer.direction === "desce" ? 1 : -1;
       deltaP += sign * contrib;
-      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, type: "substitution", formula: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ρ × g × h`, substitution: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${rho} × ${g} × ${h}`, result: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
+      const signSymbol = sign > 0 ? "+" : "-";
+      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, type: "substitution", formula: `\\Delta P_{${i+1}} = ${signSymbol} \\, \\rho \\cdot g \\cdot h`, substitution: `\\Delta P_{${i+1}} = ${signSymbol} \\, ${rho} \\times ${g} \\times ${h} = ${signSymbol} \\, ${contrib.toFixed(2)} \\text{ Pa}`, result: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
     });
-    const sumExpr = layers.map((layer, i) => { const rho = parseFloat(layer.rho); const h = parseFloat(layer.h); const contrib = rho * g * h; const sign = layer.direction === "desce" ? "+" : "−"; return `${sign} ${contrib.toFixed(2)}`; }).join(" ");
-    steps.push({ label: "Soma das Contribuições", type: "calculation", formula: `ΔP = ${sumExpr}`, result: `ΔP = ${deltaP.toFixed(2)} Pa` });
+    const sumExpr = layers.map((layer, i) => { const rho = parseFloat(layer.rho); const h = parseFloat(layer.h); const contrib = rho * g * h; const sign = layer.direction === "desce" ? "+" : "-"; return `${sign} ${contrib.toFixed(2)}`; }).join(" ");
+    steps.push({ label: "Soma das Contribuições", type: "calculation", formula: `\\Delta P = ${sumExpr}`, result: `ΔP = ${deltaP.toFixed(2)} Pa` });
     steps.push({ label: "Resultado Final", type: "result", result: `ΔP = ${deltaP.toFixed(2)} Pa = ${(deltaP / 1000).toFixed(4)} kPa` });
 
     setResult({ deltaP, steps });
@@ -105,8 +106,8 @@ export default function ManometriaPage() {
 
       <div className="mt-12 border-t border-border pt-8 space-y-4">
         <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">Estática dos Fluidos e o Teorema de Stevin na Prática</h2>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">A manometria é a técnica fundamental da estática dos fluidos utilizada para calcular variações de pressão em fluidos em repouso. O pilar desta análise é o Teorema de Stevin (Lei de Stevin), que estabelece que a pressão absoluta em um ponto de um fluido estático depende apenas da profundidade (altura da coluna de líquido), da densidade do fluido em questão e da aceleração da gravidade local (ΔP = ρ × g × h).</p>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">Em problemas de manômetros diferenciais, tubos em U e piezômetros, a metodologia exige o percurso isobárico ao longo das interfaces dos fluidos. Quando o sentido da medição desce ao longo do tubo, a pressão hidrostática aumenta em proporção ao peso específico do fluido. Quando o caminho de medição sobe, a pressão diminui. O domínio dessa soma e subtração de cargas de pressão é vital para o correto diagnóstico de pressões em vasos de pressão, tanques industriais e redes de distribuição.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">A manometria é a técnica fundamental da estática dos fluidos utilizada para calcular variações de pressão em fluidos em repouso.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">Em problemas de manômetros diferenciais, tubos em U e piezômetros, a metodologia exige o percurso isobárico ao longo das interfaces dos fluidos.</p>
       </div>
     </CalculatorLayout>
   );

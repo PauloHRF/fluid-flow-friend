@@ -61,17 +61,16 @@ export default function ContinuidadePage() {
     let solved: number;
     let solvedLabel: string;
 
-    // Data inputs step
     if (mode === "diametro") {
       const d1 = parseFloat(D1); const d2 = parseFloat(D2);
-      steps.push({ label: "Dados de Entrada", type: "info", result: mode === "diametro" ? `D₁ = ${D1} m | D₂ = ${D2} m` : `A₁ = ${A1} m² | A₂ = ${A2} m²` });
-      steps.push({ label: "Conversão Diâmetro → Área", type: "substitution", formula: "A = π × (D/2)²", substitution: `A₁ = π × (${d1}/2)² | A₂ = π × (${d2}/2)²`, result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
+      steps.push({ label: "Dados de Entrada", type: "info", result: `D₁ = ${D1} m | D₂ = ${D2} m` });
+      steps.push({ label: "Conversão Diâmetro → Área", type: "substitution", formula: `A = \\pi \\cdot \\left(\\frac{D}{2}\\right)^2`, substitution: `A_1 = \\pi \\cdot \\left(\\frac{${d1}}{2}\\right)^2 = ${a1!.toFixed(6)} \\text{ m}^2 \\quad | \\quad A_2 = \\pi \\cdot \\left(\\frac{${d2}}{2}\\right)^2 = ${a2!.toFixed(6)} \\text{ m}^2`, result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
     } else {
       steps.push({ label: "Dados de Entrada", type: "info", result: `A₁ = ${A1} m² | A₂ = ${A2} m²` });
     }
 
     if (compressivel) {
-      steps.push({ label: "Equação da Continuidade (Compressível)", type: "formula", formula: "ρ₁ × A₁ × V₁ = ρ₂ × A₂ × V₂", result: `Conservação de massa com ρ₁ = ${density1} kg/m³ e ρ₂ = ${density2} kg/m³` });
+      steps.push({ label: "Equação da Continuidade (Compressível)", type: "formula", formula: `\\rho_1 \\cdot A_1 \\cdot V_1 = \\rho_2 \\cdot A_2 \\cdot V_2`, result: `Conservação de massa com ρ₁ = ${density1} kg/m³ e ρ₂ = ${density2} kg/m³` });
       switch (incognita) {
         case "V2": solved = (density1 * a1! * v1) / (density2 * a2!); solvedLabel = "Velocidade V₂"; break;
         case "V1": solved = (density2 * a2! * v2) / (density1 * a1!); solvedLabel = "Velocidade V₁"; break;
@@ -79,11 +78,12 @@ export default function ContinuidadePage() {
         case "A2": solved = (density1 * a1! * v1) / (density2 * v2); solvedLabel = "Área A₂"; break;
         default: return;
       }
-      const numLabel = incognita === "V2" ? `${density1} × ${a1!.toFixed(6)} × ${v1}` : incognita === "V1" ? `${density2} × ${a2!.toFixed(6)} × ${v2}` : incognita === "A1" ? `${density2} × ${a2!.toFixed(6)} × ${v2}` : `${density1} × ${a1!.toFixed(6)} × ${v1}`;
-      const denLabel = incognita === "V2" ? `${density2} × ${a2!.toFixed(6)}` : incognita === "V1" ? `${density1} × ${a1!.toFixed(6)}` : incognita === "A1" ? `${density1} × ${v1}` : `${density2} × ${v2}`;
-      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incognita} = (numerador) / (denominador)`, substitution: `${incognita} = (${numLabel}) / (${denLabel})`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
+      const incLatex = incognita.replace("V", "V_").replace("A", "A_");
+      const numLatex = incognita === "V2" ? `${density1} \\times ${a1!.toFixed(6)} \\times ${v1}` : incognita === "V1" ? `${density2} \\times ${a2!.toFixed(6)} \\times ${v2}` : incognita === "A1" ? `${density2} \\times ${a2!.toFixed(6)} \\times ${v2}` : `${density1} \\times ${a1!.toFixed(6)} \\times ${v1}`;
+      const denLatex = incognita === "V2" ? `${density2} \\times ${a2!.toFixed(6)}` : incognita === "V1" ? `${density1} \\times ${a1!.toFixed(6)}` : incognita === "A1" ? `${density1} \\times ${v1}` : `${density2} \\times ${v2}`;
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{\\text{numerador}}{\\text{denominador}}`, substitution: `${incLatex} = \\frac{${numLatex}}{${denLatex}}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     } else {
-      steps.push({ label: "Equação da Continuidade (Incompressível)", type: "formula", formula: "A₁ × V₁ = A₂ × V₂ → Q = constante", result: "Para fluido incompressível, a vazão volumétrica é conservada." });
+      steps.push({ label: "Equação da Continuidade (Incompressível)", type: "formula", formula: `A_1 \\cdot V_1 = A_2 \\cdot V_2 \\quad \\Rightarrow \\quad Q = \\text{constante}`, result: "Para fluido incompressível, a vazão volumétrica é conservada." });
       switch (incognita) {
         case "V2": solved = (a1! * v1) / a2!; solvedLabel = "Velocidade V₂"; break;
         case "V1": solved = (a2! * v2) / a1!; solvedLabel = "Velocidade V₁"; break;
@@ -91,13 +91,14 @@ export default function ContinuidadePage() {
         case "A2": solved = (a1! * v1) / v2; solvedLabel = "Área A₂"; break;
         default: return;
       }
-      const numLabel = incognita === "V2" ? `${a1!.toFixed(6)} × ${v1}` : incognita === "V1" ? `${a2!.toFixed(6)} × ${v2}` : incognita === "A1" ? `${a2!.toFixed(6)} × ${v2}` : `${a1!.toFixed(6)} × ${v1}`;
-      const denLabel = incognita === "V2" ? `${a2!.toFixed(6)}` : incognita === "V1" ? `${a1!.toFixed(6)}` : incognita === "A1" ? `${v1}` : `${v2}`;
-      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incognita} = (A × V) / (...)`, substitution: `${incognita} = ${numLabel} / ${denLabel}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
+      const incLatex = incognita.replace("V", "V_").replace("A", "A_");
+      const numLatex = incognita === "V2" ? `${a1!.toFixed(6)} \\times ${v1}` : incognita === "V1" ? `${a2!.toFixed(6)} \\times ${v2}` : incognita === "A1" ? `${a2!.toFixed(6)} \\times ${v2}` : `${a1!.toFixed(6)} \\times ${v1}`;
+      const denLatex = incognita === "V2" ? `${a2!.toFixed(6)}` : incognita === "V1" ? `${a1!.toFixed(6)}` : incognita === "A1" ? `${v1}` : `${v2}`;
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{A \\cdot V}{\\ldots}`, substitution: `${incLatex} = \\frac{${numLatex}}{${denLatex}}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     }
 
     const Q = a1! * (incognita === "V1" ? solved : v1);
-    steps.push({ label: "Vazão Volumétrica", type: "calculation", formula: "Q = A × V", substitution: `Q = ${a1!.toFixed(6)} × ${incognita === "V1" ? solved.toFixed(6) : v1}`, result: `Q = ${Q.toFixed(6)} m³/s` });
+    steps.push({ label: "Vazão Volumétrica", type: "calculation", formula: `Q = A \\cdot V`, substitution: `Q = ${a1!.toFixed(6)} \\times ${incognita === "V1" ? solved.toFixed(6) : v1}`, result: `Q = ${Q.toFixed(6)} m³/s` });
     steps.push({ label: "Resultado Final", type: "result", result: `${solvedLabel!} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"} | Vazão Q = ${Q.toFixed(6)} m³/s` });
 
     setResult({ value: solved, label: solvedLabel!, steps });
@@ -164,8 +165,8 @@ export default function ContinuidadePage() {
 
       <div className="mt-12 border-t border-border pt-8 space-y-4">
         <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">Entendendo a Equação da Continuidade e a Conservação da Massa</h2>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">Na mecânica dos fluidos, a Equação da Continuidade é a expressão matemática do princípio da conservação da massa para um volume de controle. Em termos práticos de engenharia, isso significa que a massa de fluido que entra em uma tubulação deve ser exatamente igual à massa que sai, assumindo que não há acúmulo no sistema. Para fluidos incompressíveis (como a água na maioria das aplicações prediais e industriais), a densidade permanece constante, o que simplifica a equação para a conservação da vazão volumétrica (Q = A × V).</p>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">Reduções no diâmetro da tubulação (estreitamentos) forçam o fluido a aumentar a sua velocidade de escoamento para que a mesma vazão consiga passar pela seção transversal menor. Compreender essa relação entre área geométrica e campo de velocidade é o primeiro passo para dimensionar sistemas de recalque e prever o comportamento dinâmico de qualquer fluido em movimento.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">Na mecânica dos fluidos, a Equação da Continuidade é a expressão matemática do princípio da conservação da massa para um volume de controle.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">Reduções no diâmetro da tubulação forçam o fluido a aumentar a sua velocidade de escoamento para que a mesma vazão consiga passar pela seção transversal menor.</p>
       </div>
     </CalculatorLayout>
   );

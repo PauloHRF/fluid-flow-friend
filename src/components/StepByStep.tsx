@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { ExportPDF } from "@/components/ExportPDF";
+import { LatexRenderer } from "@/components/LatexRenderer";
 
 export type StepType = "info" | "formula" | "substitution" | "calculation" | "result" | "verdict";
 
@@ -23,6 +24,11 @@ const stepTypeConfig: Record<StepType, { icon: string; accent: string; bg: strin
   result:       { icon: "✅", accent: "border-l-primary",         bg: "bg-primary/10" },
   verdict:      { icon: "📋", accent: "border-l-primary",         bg: "bg-primary/10" },
 };
+
+/** Detect if a string looks like LaTeX (contains backslash commands or braces patterns) */
+function isLatex(str: string): boolean {
+  return /\\[a-zA-Z]|\\frac|\\cdot|\^{|_{/.test(str);
+}
 
 export function StepByStep({ steps }: StepByStepProps) {
   const lastIndex = steps.length - 1;
@@ -71,21 +77,29 @@ export function StepByStep({ steps }: StepByStepProps) {
                       {step.label}
                     </p>
 
-                    {/* Formula - the general equation */}
+                    {/* Formula - rendered with LaTeX if detected */}
                     {step.formula && (
-                      <div className="mb-2 px-3 py-1.5 rounded bg-background/80 border border-border/50 inline-block">
-                        <p className="text-sm font-heading text-foreground italic tracking-wide">
-                          {step.formula}
-                        </p>
+                      <div className="mb-2 px-3 py-2 rounded bg-background/80 border border-border/50 inline-block overflow-x-auto max-w-full">
+                        {isLatex(step.formula) ? (
+                          <LatexRenderer math={step.formula} display className="text-foreground" />
+                        ) : (
+                          <p className="text-sm font-heading text-foreground italic tracking-wide">
+                            {step.formula}
+                          </p>
+                        )}
                       </div>
                     )}
 
-                    {/* Substitution - values plugged in */}
+                    {/* Substitution - rendered with LaTeX if detected */}
                     {step.substitution && (
-                      <div className="mb-2 px-3 py-1.5 rounded bg-accent/20 border border-accent/30 inline-block">
-                        <p className="text-sm font-body text-foreground font-medium tracking-wide">
-                          ➜ {step.substitution}
-                        </p>
+                      <div className="mb-2 px-3 py-2 rounded bg-accent/20 border border-accent/30 inline-block overflow-x-auto max-w-full">
+                        {isLatex(step.substitution) ? (
+                          <LatexRenderer math={step.substitution} className="text-foreground" />
+                        ) : (
+                          <p className="text-sm font-body text-foreground font-medium tracking-wide">
+                            ➜ {step.substitution}
+                          </p>
+                        )}
                       </div>
                     )}
 
