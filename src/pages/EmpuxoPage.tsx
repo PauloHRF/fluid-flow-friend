@@ -47,9 +47,9 @@ export default function EmpuxoPage() {
     steps.push({ label: "Dados de Entrada", type: "info", result: `Massa = ${m} kg | ρ_fluido = ${rhoF} kg/m³ | g = ${g} m/s²` });
 
     switch (shape) {
-      case "cilindro": { const r = parseFloat(raio); const h = parseFloat(altura); vol = Math.PI * r ** 2 * h; steps.push({ label: "Volume do Cilindro", type: "substitution", formula: "V = π × r² × h", substitution: `V = π × ${r}² × ${h}`, result: `V = ${vol.toFixed(6)} m³` }); break; }
-      case "esfera": { const r = parseFloat(raio); vol = (4 / 3) * Math.PI * r ** 3; steps.push({ label: "Volume da Esfera", type: "substitution", formula: "V = (4/3) × π × r³", substitution: `V = (4/3) × π × ${r}³`, result: `V = ${vol.toFixed(6)} m³` }); break; }
-      case "paralelepipedo": { const c = parseFloat(comprimento); const l = parseFloat(largura); const h = parseFloat(altura); vol = c * l * h; steps.push({ label: "Volume do Paralelepípedo", type: "substitution", formula: "V = C × L × H", substitution: `V = ${c} × ${l} × ${h}`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      case "cilindro": { const r = parseFloat(raio); const h = parseFloat(altura); vol = Math.PI * r ** 2 * h; steps.push({ label: "Volume do Cilindro", type: "substitution", formula: `V = \\pi \\cdot r^2 \\cdot h`, substitution: `V = \\pi \\cdot ${r}^2 \\cdot ${h} = ${vol.toFixed(6)} \\text{ m}^3`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      case "esfera": { const r = parseFloat(raio); vol = (4 / 3) * Math.PI * r ** 3; steps.push({ label: "Volume da Esfera", type: "substitution", formula: `V = \\frac{4}{3} \\cdot \\pi \\cdot r^3`, substitution: `V = \\frac{4}{3} \\cdot \\pi \\cdot ${r}^3 = ${vol.toFixed(6)} \\text{ m}^3`, result: `V = ${vol.toFixed(6)} m³` }); break; }
+      case "paralelepipedo": { const c = parseFloat(comprimento); const l = parseFloat(largura); const h = parseFloat(altura); vol = c * l * h; steps.push({ label: "Volume do Paralelepípedo", type: "substitution", formula: `V = C \\cdot L \\cdot H`, substitution: `V = ${c} \\times ${l} \\times ${h} = ${vol.toFixed(6)} \\text{ m}^3`, result: `V = ${vol.toFixed(6)} m³` }); break; }
       default: { vol = parseFloat(volume); steps.push({ label: "Volume Informado", type: "info", result: `V = ${vol} m³` }); }
     }
 
@@ -63,11 +63,11 @@ export default function EmpuxoPage() {
 
     const empuxo = rhoF * volSubmerso * g;
 
-    steps.push({ label: "Peso do Objeto", type: "substitution", formula: "W = m × g", substitution: `W = ${m} × ${g}`, result: `W = ${peso.toFixed(4)} N` });
-    steps.push({ label: "Densidade do Objeto", type: "substitution", formula: "ρ_obj = m / V", substitution: `ρ_obj = ${m} / ${vol.toFixed(6)}`, result: `ρ_obj = ${rhoObj.toFixed(2)} kg/m³` });
+    steps.push({ label: "Peso do Objeto", type: "substitution", formula: `W = m \\cdot g`, substitution: `W = ${m} \\times ${g} = ${peso.toFixed(4)} \\text{ N}`, result: `W = ${peso.toFixed(4)} N` });
+    steps.push({ label: "Densidade do Objeto", type: "substitution", formula: `\\rho_{obj} = \\frac{m}{V}`, substitution: `\\rho_{obj} = \\frac{${m}}{${vol.toFixed(6)}} = ${rhoObj.toFixed(2)} \\text{ kg/m}^3`, result: `ρ_obj = ${rhoObj.toFixed(2)} kg/m³` });
     steps.push({ label: "Comparação de Densidades", type: "info", result: `ρ_obj (${rhoObj.toFixed(2)}) ${rhoObj < rhoF ? "<" : rhoObj === rhoF ? "=" : ">"} ρ_fluido (${rhoF}) → ${rhoObj < rhoF ? "Objeto menos denso que o fluido" : rhoObj === rhoF ? "Densidades iguais" : "Objeto mais denso que o fluido"}` });
-    steps.push({ label: "Volume Submerso", type: "substitution", formula: rhoObj < rhoF ? "V_sub = m / ρ_fluido" : "V_sub = V (totalmente submerso)", substitution: rhoObj < rhoF ? `V_sub = ${m} / ${rhoF}` : `V_sub = ${vol.toFixed(6)}`, result: `V_sub = ${volSubmerso.toFixed(6)} m³` });
-    steps.push({ label: "Força de Empuxo (Princípio de Arquimedes)", type: "substitution", formula: "E = ρ_fluido × V_sub × g", substitution: `E = ${rhoF} × ${volSubmerso.toFixed(6)} × ${g}`, result: `E = ${empuxo.toFixed(4)} N` });
+    steps.push({ label: "Volume Submerso", type: "substitution", formula: rhoObj < rhoF ? `V_{sub} = \\frac{m}{\\rho_{fluido}}` : `V_{sub} = V \\text{ (totalmente submerso)}`, substitution: rhoObj < rhoF ? `V_{sub} = \\frac{${m}}{${rhoF}} = ${volSubmerso.toFixed(6)} \\text{ m}^3` : `V_{sub} = ${vol.toFixed(6)} \\text{ m}^3`, result: `V_sub = ${volSubmerso.toFixed(6)} m³` });
+    steps.push({ label: "Força de Empuxo (Princípio de Arquimedes)", type: "substitution", formula: `E = \\rho_{fluido} \\cdot V_{sub} \\cdot g`, substitution: `E = ${rhoF} \\times ${volSubmerso.toFixed(6)} \\times ${g} = ${empuxo.toFixed(4)} \\text{ N}`, result: `E = ${empuxo.toFixed(4)} N` });
     steps.push({ label: "Laudo Final", type: "verdict", result: laudo });
 
     setResult({ empuxo, peso, laudo, volSubmerso, steps });
@@ -114,8 +114,8 @@ export default function EmpuxoPage() {
 
       <div className="mt-12 border-t border-border pt-8 space-y-4">
         <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">O Princípio de Arquimedes e a Força de Flutuação (Empuxo)</h2>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">A força de empuxo é o fenômeno hidrostático que dita a estabilidade e a flutuação de corpos imersos em fluidos. Pelo Princípio de Arquimedes, qualquer objeto parcial ou totalmente submerso experimenta uma força vertical ascendente, cuja magnitude é exatamente igual ao peso do volume do fluido que foi deslocado pelo corpo.</p>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">A análise de flutuabilidade exige o cruzamento direto de densidades. Se a densidade média do objeto for superior à densidade do fluido, a força peso supera o empuxo máximo possível, resultando no afundamento. Caso a densidade do corpo seja inferior à do líquido, ocorre a flutuação, e o sistema encontra equilíbrio quando a fração do volume submerso desloca a exata quantidade de fluido necessária para igualar a força peso total do corpo. Esse cálculo é a base da engenharia naval, dimensionamento de balsas, boias de nível e hidrômetros.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">A força de empuxo é o fenômeno hidrostático que dita a estabilidade e a flutuação de corpos imersos em fluidos.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">A análise de flutuabilidade exige o cruzamento direto de densidades. Esse cálculo é a base da engenharia naval, dimensionamento de balsas, boias de nível e hidrômetros.</p>
       </div>
     </CalculatorLayout>
   );

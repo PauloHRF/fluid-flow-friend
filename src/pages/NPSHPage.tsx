@@ -51,12 +51,12 @@ export default function NPSHPage() {
 
     const steps: any[] = [
       { label: "Dados de Entrada", type: "info", result: `Patm = ${patm} Pa | Pvapor = ${pvap} Pa | hs = ${hs} m | hperdas = ${hp} m | v = ${vs} m/s | ρ = ${density} kg/m³` },
-      { label: "Fórmula do NPSH Disponível", type: "formula", formula: "NPSHd = (Patm − Pvapor)/(ρg) − hs − hperdas + v²/(2g)", result: "Energia líquida positiva de sucção disponível na instalação." },
-      { label: "Carga de Pressão", type: "substitution", formula: "(Patm − Pvapor) / (ρ × g)", substitution: `(${patm} − ${pvap}) / (${density} × ${g})`, result: `Carga de pressão = ${pressureHead.toFixed(4)} m` },
+      { label: "Fórmula do NPSH Disponível", type: "formula", formula: `\\text{NPSH}_d = \\frac{P_{atm} - P_{vapor}}{\\rho \\cdot g} - h_s - h_{perdas} + \\frac{v^2}{2g}`, result: "Energia líquida positiva de sucção disponível na instalação." },
+      { label: "Carga de Pressão", type: "substitution", formula: `\\frac{P_{atm} - P_{vapor}}{\\rho \\cdot g}`, substitution: `\\frac{${patm} - ${pvap}}{${density} \\times ${g}} = ${pressureHead.toFixed(4)} \\text{ m}`, result: `Carga de pressão = ${pressureHead.toFixed(4)} m` },
       { label: "Altura Geométrica de Sucção", type: "info", result: `hs = ${hs} m (distância vertical entre reservatório e bomba)` },
       { label: "Perdas de Carga na Sucção", type: "info", result: `hperdas = ${hp} m (perdas distribuídas + localizadas na tubulação de sucção)` },
-      { label: "Carga de Velocidade", type: "substitution", formula: "v² / (2g)", substitution: `${vs}² / (2 × ${g})`, result: `Carga de velocidade = ${velocityHead.toFixed(4)} m` },
-      { label: "Cálculo do NPSH Disponível", type: "substitution", formula: "NPSHd = carga_pressão − hs − hperdas + carga_velocidade", substitution: `NPSHd = ${pressureHead.toFixed(4)} − ${hs} − ${hp} + ${velocityHead.toFixed(4)}`, result: `NPSHd = ${npshd.toFixed(4)} m` },
+      { label: "Carga de Velocidade", type: "substitution", formula: `\\frac{v^2}{2g}`, substitution: `\\frac{${vs}^2}{2 \\times ${g}} = ${velocityHead.toFixed(4)} \\text{ m}`, result: `Carga de velocidade = ${velocityHead.toFixed(4)} m` },
+      { label: "Cálculo do NPSH Disponível", type: "substitution", formula: `\\text{NPSH}_d = \\frac{P_{atm} - P_{vapor}}{\\rho g} - h_s - h_{perdas} + \\frac{v^2}{2g}`, substitution: `\\text{NPSH}_d = ${pressureHead.toFixed(4)} - ${hs} - ${hp} + ${velocityHead.toFixed(4)} = ${npshd.toFixed(4)} \\text{ m}`, result: `NPSHd = ${npshd.toFixed(4)} m` },
     ];
 
     let cavita: boolean | null = null;
@@ -105,8 +105,8 @@ export default function NPSHPage() {
 
       <div className="mt-12 border-t border-border pt-8 space-y-4">
         <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">NPSH e a Prevenção do Fenômeno de Cavitação em Bombas Centrífugas</h2>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">O dimensionamento de um sistema de bombeamento vai muito além de vencer a elevação do terreno. O Net Positive Suction Head (NPSH), ou Carga Líquida Positiva de Sucção, é o principal parâmetro de segurança contra a cavitação. A cavitação ocorre quando a pressão absoluta na linha de sucção do fluido cai abaixo da sua pressão de vapor na temperatura de operação, causando a ebulição instantânea e a formação de microbolhas de vapor. Quando essas bolhas atingem a zona de alta pressão dentro do rotor da bomba, elas colapsam violentamente, arrancando material do impelidor e destruindo o equipamento.</p>
-        <p className="text-sm font-body text-muted-foreground leading-relaxed">Para garantir a integridade mecânica da bomba centrífuga, o engenheiro deve garantir matematicamente que a energia disponível na sucção (NPSH Disponível, que depende do arranjo físico da instalação, perdas de carga, pressão atmosférica e pressão de vapor) seja estritamente maior que o NPSH Requerido, um valor tabelado e fornecido pelo fabricante da bomba com base em testes de bancada.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">O NPSH (Net Positive Suction Head) é o principal parâmetro de segurança contra a cavitação em bombas centrífugas.</p>
+        <p className="text-sm font-body text-muted-foreground leading-relaxed">O engenheiro deve garantir que NPSHd seja estritamente maior que NPSHr para integridade mecânica da bomba.</p>
       </div>
     </CalculatorLayout>
   );

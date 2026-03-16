@@ -60,10 +60,10 @@ export default function DarcyWeisbachPage() {
 
     const steps = [
       { label: "Dados de Entrada", type: "info" as const, result: `ρ = ${density} kg/m³ | v = ${velocity} m/s | D = ${diameter} m | L = ${length} m | ε = ${roughness} m | μ = ${viscosity} Pa·s` },
-      { label: "Número de Reynolds", type: "substitution" as const, formula: "Re = (ρ × v × D) / μ", substitution: `Re = (${density} × ${velocity} × ${diameter}) / ${viscosity}`, result: `Re = ${re.toFixed(2)} → ${re < 2300 ? "Laminar" : re < 4000 ? "Transição" : "Turbulento"}` },
-      { label: "Rugosidade Relativa", type: "substitution" as const, formula: "ε/D", substitution: `ε/D = ${roughness} / ${diameter}`, result: `ε/D = ${relRoughness.toFixed(6)}` },
-      { label: "Fator de Atrito (f)", type: "calculation" as const, formula: re < 2300 ? "f = 64 / Re (regime laminar)" : "Aprox. Swamee-Jain (regime turbulento)", substitution: !isNaN(fVal) && fVal > 0 ? `f = ${fVal} (valor fornecido pelo usuário)` : re < 2300 ? `f = 64 / ${re.toFixed(2)}` : `f = 0.25 / [log₁₀(ε/3.7D + 5.74/Re⁰·⁹)]²`, result: `f = ${friction.toFixed(6)}` },
-      { label: "Equação de Darcy-Weisbach", type: "substitution" as const, formula: "hf = f × (L/D) × (v²/2g)", substitution: `hf = ${friction.toFixed(6)} × (${length}/${diameter}) × (${velocity}²/(2×${g}))`, result: `hf = ${friction.toFixed(6)} × ${(length / diameter).toFixed(4)} × ${(velocity ** 2 / (2 * g)).toFixed(6)}` },
+      { label: "Número de Reynolds", type: "substitution" as const, formula: `\\text{Re} = \\frac{\\rho \\cdot v \\cdot D}{\\mu}`, substitution: `\\text{Re} = \\frac{${density} \\times ${velocity} \\times ${diameter}}{${viscosity}} = ${re.toFixed(2)}`, result: `Re = ${re.toFixed(2)} → ${re < 2300 ? "Laminar" : re < 4000 ? "Transição" : "Turbulento"}` },
+      { label: "Rugosidade Relativa", type: "substitution" as const, formula: `\\frac{\\varepsilon}{D}`, substitution: `\\frac{\\varepsilon}{D} = \\frac{${roughness}}{${diameter}} = ${relRoughness.toFixed(6)}`, result: `ε/D = ${relRoughness.toFixed(6)}` },
+      { label: "Fator de Atrito (f)", type: "calculation" as const, formula: re < 2300 ? `f = \\frac{64}{\\text{Re}}` : `f = \\frac{0{,}25}{\\left[\\log_{10}\\!\\left(\\frac{\\varepsilon}{3{,}7D} + \\frac{5{,}74}{\\text{Re}^{0{,}9}}\\right)\\right]^2}`, substitution: !isNaN(fVal) && fVal > 0 ? `f = ${fVal} \\text{ (fornecido)}` : re < 2300 ? `f = \\frac{64}{${re.toFixed(2)}} = ${friction.toFixed(6)}` : `f = \\frac{0{,}25}{\\left[\\log_{10}\\!\\left(\\frac{${roughness}}{3{,}7 \\times ${diameter}} + \\frac{5{,}74}{${re.toFixed(2)}^{0{,}9}}\\right)\\right]^2} = ${friction.toFixed(6)}`, result: `f = ${friction.toFixed(6)}` },
+      { label: "Equação de Darcy-Weisbach", type: "substitution" as const, formula: `h_f = f \\cdot \\frac{L}{D} \\cdot \\frac{v^2}{2g}`, substitution: `h_f = ${friction.toFixed(6)} \\times \\frac{${length}}{${diameter}} \\times \\frac{${velocity}^2}{2 \\times ${g}}`, result: `hf = ${friction.toFixed(6)} × ${(length / diameter).toFixed(4)} × ${(velocity ** 2 / (2 * g)).toFixed(6)}` },
       { label: "Resultado Final", type: "result" as const, result: `hf = ${hf.toFixed(4)} m (perda de carga distribuída)` },
     ];
 
@@ -104,10 +104,10 @@ export default function DarcyWeisbachPage() {
           Cálculo da Perda de Carga e a Equação de Darcy-Weisbach
         </h2>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">
-          Em qualquer sistema industrial de transporte de fluidos, o atrito entre o líquido e a parede interna da tubulação causa uma dissipação contínua de energia, conhecida como perda de carga distribuída. A Equação de Darcy-Weisbach é o método mais rigoroso e universalmente aceito na engenharia para quantificar essa perda. Ela relaciona a energia dissipada com o comprimento e o diâmetro do tubo, a velocidade média do escoamento e o fator de atrito (f).
+          A Equação de Darcy-Weisbach é o método mais rigoroso e universalmente aceito na engenharia para quantificar a perda de carga distribuída em tubulações.
         </p>
         <p className="text-sm font-body text-muted-foreground leading-relaxed">
-          A determinação exata do fator de atrito é o coração do cálculo. Para escoamentos laminares, ele depende exclusivamente do Número de Reynolds. No entanto, para escoamentos turbulentos, o fator de atrito torna-se uma função complexa que envolve tanto a turbulência do fluido quanto a rugosidade relativa do material do tubo (PVC, aço galvanizado, ferro fundido), sendo tipicamente resolvido através do Diagrama de Moody ou da Equação de Colebrook-White. O correto dimensionamento dessa perda de energia é o que define a potência mecânica exigida da bomba centrífuga da instalação.
+          A determinação exata do fator de atrito é o coração do cálculo. Para escoamentos turbulentos, o fator de atrito torna-se uma função complexa resolvida pelo Diagrama de Moody ou pela Equação de Colebrook-White.
         </p>
       </div>
     </CalculatorLayout>
