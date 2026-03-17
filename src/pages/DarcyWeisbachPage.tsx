@@ -16,6 +16,8 @@ export default function DarcyWeisbachPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ hf: number; friction: number; re: number; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const g = 9.81;
 
@@ -33,12 +35,12 @@ export default function DarcyWeisbachPage() {
     if (Object.keys(e).length > 0) return;
 
     const fVal = parseFloat(f);
-    const length = parseFloat(L);
-    const diameter = parseFloat(D);
-    const velocity = parseFloat(v);
-    const roughness = parseFloat(epsilon);
-    const density = parseFloat(rho);
-    const viscosity = parseFloat(mu);
+    const length = parseFloat(L) * (factors.L || 1);
+    const diameter = parseFloat(D) * (factors.D || 1);
+    const velocity = parseFloat(v) * (factors.v || 1);
+    const roughness = parseFloat(epsilon) * (factors.epsilon || 1);
+    const density = parseFloat(rho) * (factors.rho || 1);
+    const viscosity = parseFloat(mu) * (factors.mu || 1);
 
     const re = (density * velocity * diameter) / viscosity;
     const relRoughness = roughness / diameter;
@@ -62,8 +64,8 @@ export default function DarcyWeisbachPage() {
       { label: "Dados de Entrada", type: "info" as const, result: `ρ = ${density} kg/m³ | v = ${velocity} m/s | D = ${diameter} m | L = ${length} m | ε = ${roughness} m | μ = ${viscosity} Pa·s` },
       { label: "Número de Reynolds", type: "substitution" as const, formula: `\\text{Re} = \\frac{\\rho \\cdot v \\cdot D}{\\mu}`, substitution: `\\text{Re} = \\frac{${density} \\times ${velocity} \\times ${diameter}}{${viscosity}} = ${re.toFixed(2)}`, result: `Re = ${re.toFixed(2)} → ${re < 2300 ? "Laminar" : re < 4000 ? "Transição" : "Turbulento"}` },
       { label: "Rugosidade Relativa", type: "substitution" as const, formula: `\\frac{\\varepsilon}{D}`, substitution: `\\frac{\\varepsilon}{D} = \\frac{${roughness}}{${diameter}} = ${relRoughness.toFixed(6)}`, result: `ε/D = ${relRoughness.toFixed(6)}` },
-      { label: "Fator de Atrito (f)", type: "calculation" as const, formula: re < 2300 ? `f = \\frac{64}{\\text{Re}}` : `f = \\frac{0{,}25}{\\left[\\log_{10}\\!\\left(\\frac{\\varepsilon}{3{,}7D} + \\frac{5{,}74}{\\text{Re}^{0{,}9}}\\right)\\right]^2}`, substitution: !isNaN(fVal) && fVal > 0 ? `f = ${fVal} \\text{ (fornecido)}` : re < 2300 ? `f = \\frac{64}{${re.toFixed(2)}} = ${friction.toFixed(6)}` : `f = \\frac{0{,}25}{\\left[\\log_{10}\\!\\left(\\frac{${roughness}}{3{,}7 \\times ${diameter}} + \\frac{5{,}74}{${re.toFixed(2)}^{0{,}9}}\\right)\\right]^2} = ${friction.toFixed(6)}`, result: `f = ${friction.toFixed(6)}` },
-      { label: "Equação de Darcy-Weisbach", type: "substitution" as const, formula: `h_f = f \\cdot \\frac{L}{D} \\cdot \\frac{v^2}{2g}`, substitution: `h_f = ${friction.toFixed(6)} \\times \\frac{${length}}{${diameter}} \\times \\frac{${velocity}^2}{2 \\times ${g}}`, result: `hf = ${friction.toFixed(6)} × ${(length / diameter).toFixed(4)} × ${(velocity ** 2 / (2 * g)).toFixed(6)}` },
+      { label: "Fator de Atrito (f)", type: "calculation" as const, formula: re < 2300 ? `f = \\frac{64}{\\text{Re}}` : `f = \\frac{0{,}25}{\\left[\\log_{10}\\!\\left(\\frac{\\varepsilon}{3{,}7D} + \\frac{5{,}74}{\\text{Re}^{0{,}9}}\\right)\\right]^2}`, substitution: !isNaN(fVal) && fVal > 0 ? `f = ${fVal} \\text{ (fornecido)}` : re < 2300 ? `f = \\frac{64}{${re.toFixed(2)}} = ${friction.toFixed(6)}` : `f = ${friction.toFixed(6)}`, result: `f = ${friction.toFixed(6)}` },
+      { label: "Equação de Darcy-Weisbach", type: "substitution" as const, formula: `h_f = f \\cdot \\frac{L}{D} \\cdot \\frac{v^2}{2g}`, substitution: `h_f = ${friction.toFixed(6)} \\times \\frac{${length}}{${diameter}} \\times \\frac{${velocity}^2}{2 \\times ${g}}`, result: `hf = ${hf.toFixed(4)} m` },
       { label: "Resultado Final", type: "result" as const, result: `hf = ${hf.toFixed(4)} m (perda de carga distribuída)` },
     ];
 
@@ -78,12 +80,12 @@ export default function DarcyWeisbachPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <InputField label="Fator de Atrito (f)" unit="adimensional" value={f} onChange={setF} />
-        <InputField label="Comprimento (L)" unit="m" value={L} onChange={(v) => { setL(v); clearError("L"); }} error={errors.L} />
-        <InputField label="Diâmetro (D)" unit="m" value={D} onChange={(v) => { setD(v); clearError("D"); }} error={errors.D} />
-        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(val) => { setV(val); clearError("v"); }} error={errors.v} />
-        <InputField label="Rugosidade (ε)" unit="m" value={epsilon} onChange={(v) => { setEpsilon(v); clearError("epsilon"); }} error={errors.epsilon} />
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); clearError("rho"); }} error={errors.rho} />
-        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v) => { setMu(v); clearError("mu"); }} error={errors.mu} />
+        <InputField label="Comprimento (L)" unit="m" value={L} onChange={(v) => { setL(v); clearError("L"); }} error={errors.L} unitGroup="length" onUnitFactorChange={(f) => setFactor("L", f)} />
+        <InputField label="Diâmetro (D)" unit="m" value={D} onChange={(v) => { setD(v); clearError("D"); }} error={errors.D} unitGroup="length" onUnitFactorChange={(f) => setFactor("D", f)} />
+        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(val) => { setV(val); clearError("v"); }} error={errors.v} unitGroup="velocity" onUnitFactorChange={(f) => setFactor("v", f)} />
+        <InputField label="Rugosidade (ε)" unit="m" value={epsilon} onChange={(v) => { setEpsilon(v); clearError("epsilon"); }} error={errors.epsilon} unitGroup="length" onUnitFactorChange={(f) => setFactor("epsilon", f)} />
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); clearError("rho"); }} error={errors.rho} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho", f)} />
+        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v) => { setMu(v); clearError("mu"); }} error={errors.mu} unitGroup="viscosity" onUnitFactorChange={(f) => setFactor("mu", f)} />
       </div>
 
       <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">Calcular</button>

@@ -23,6 +23,8 @@ export default function ContinuidadePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ value: number; label: string; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const areaFromDiam = (d: number) => Math.PI * (d / 2) ** 2;
   const clearError = (key: string) => setErrors((e) => ({ ...e, [key]: "" }));
@@ -32,26 +34,26 @@ export default function ContinuidadePage() {
     let a1: number, a2: number;
 
     if (mode === "diametro") {
-      const d1 = parseFloat(D1); const d2 = parseFloat(D2);
-      if (incognita !== "A1" && (isNaN(d1))) e.D1 = "Campo obrigatório";
-      if (incognita !== "A2" && (isNaN(d2))) e.D2 = "Campo obrigatório";
+      const d1 = parseFloat(D1) * (factors.D1 || 1); const d2 = parseFloat(D2) * (factors.D2 || 1);
+      if (incognita !== "A1" && (isNaN(parseFloat(D1)))) e.D1 = "Campo obrigatório";
+      if (incognita !== "A2" && (isNaN(parseFloat(D2)))) e.D2 = "Campo obrigatório";
       if (Object.keys(e).length > 0) { setErrors(e); return; }
       a1 = areaFromDiam(d1); a2 = areaFromDiam(d2);
     } else {
-      a1 = parseFloat(A1); a2 = parseFloat(A2);
-      if (incognita !== "A1" && isNaN(a1)) e.A1 = "Campo obrigatório";
-      if (incognita !== "A2" && isNaN(a2)) e.A2 = "Campo obrigatório";
+      a1 = parseFloat(A1) * (factors.A1 || 1); a2 = parseFloat(A2) * (factors.A2 || 1);
+      if (incognita !== "A1" && isNaN(parseFloat(A1))) e.A1 = "Campo obrigatório";
+      if (incognita !== "A2" && isNaN(parseFloat(A2))) e.A2 = "Campo obrigatório";
       if (Object.keys(e).length > 0) { setErrors(e); return; }
     }
 
-    const v1 = parseFloat(V1); const v2 = parseFloat(V2);
-    if (incognita !== "V1" && isNaN(v1)) e.V1 = "Campo obrigatório";
-    if (incognita !== "V2" && isNaN(v2)) e.V2 = "Campo obrigatório";
+    const v1 = parseFloat(V1) * (factors.V1 || 1); const v2 = parseFloat(V2) * (factors.V2 || 1);
+    if (incognita !== "V1" && isNaN(parseFloat(V1))) e.V1 = "Campo obrigatório";
+    if (incognita !== "V2" && isNaN(parseFloat(V2))) e.V2 = "Campo obrigatório";
 
-    const density1 = parseFloat(rho1); const density2 = parseFloat(rho2);
+    const density1 = parseFloat(rho1) * (factors.rho1 || 1); const density2 = parseFloat(rho2) * (factors.rho2 || 1);
     if (compressivel) {
-      if (isNaN(density1)) e.rho1 = "Campo obrigatório";
-      if (isNaN(density2)) e.rho2 = "Campo obrigatório";
+      if (isNaN(parseFloat(rho1))) e.rho1 = "Campo obrigatório";
+      if (isNaN(parseFloat(rho2))) e.rho2 = "Campo obrigatório";
     }
 
     setErrors(e);
@@ -62,11 +64,11 @@ export default function ContinuidadePage() {
     let solvedLabel: string;
 
     if (mode === "diametro") {
-      const d1 = parseFloat(D1); const d2 = parseFloat(D2);
-      steps.push({ label: "Dados de Entrada", type: "info", result: `D₁ = ${D1} m | D₂ = ${D2} m` });
-      steps.push({ label: "Conversão Diâmetro → Área", type: "substitution", formula: `A = \\pi \\cdot \\left(\\frac{D}{2}\\right)^2`, substitution: `A_1 = \\pi \\cdot \\left(\\frac{${d1}}{2}\\right)^2 = ${a1!.toFixed(6)} \\text{ m}^2 \\quad | \\quad A_2 = \\pi \\cdot \\left(\\frac{${d2}}{2}\\right)^2 = ${a2!.toFixed(6)} \\text{ m}^2`, result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
+      const d1 = parseFloat(D1) * (factors.D1 || 1); const d2 = parseFloat(D2) * (factors.D2 || 1);
+      steps.push({ label: "Dados de Entrada", type: "info", result: `D₁ = ${d1.toFixed(6)} m | D₂ = ${d2.toFixed(6)} m` });
+      steps.push({ label: "Conversão Diâmetro → Área", type: "substitution", formula: `A = \\pi \\cdot \\left(\\frac{D}{2}\\right)^2`, substitution: `A_1 = \\pi \\cdot \\left(\\frac{${d1.toFixed(6)}}{2}\\right)^2 = ${a1!.toFixed(6)} \\text{ m}^2 \\quad | \\quad A_2 = \\pi \\cdot \\left(\\frac{${d2.toFixed(6)}}{2}\\right)^2 = ${a2!.toFixed(6)} \\text{ m}^2`, result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
     } else {
-      steps.push({ label: "Dados de Entrada", type: "info", result: `A₁ = ${A1} m² | A₂ = ${A2} m²` });
+      steps.push({ label: "Dados de Entrada", type: "info", result: `A₁ = ${a1!.toFixed(6)} m² | A₂ = ${a2!.toFixed(6)} m²` });
     }
 
     if (compressivel) {
@@ -79,9 +81,7 @@ export default function ContinuidadePage() {
         default: return;
       }
       const incLatex = incognita.replace("V", "V_").replace("A", "A_");
-      const numLatex = incognita === "V2" ? `${density1} \\times ${a1!.toFixed(6)} \\times ${v1}` : incognita === "V1" ? `${density2} \\times ${a2!.toFixed(6)} \\times ${v2}` : incognita === "A1" ? `${density2} \\times ${a2!.toFixed(6)} \\times ${v2}` : `${density1} \\times ${a1!.toFixed(6)} \\times ${v1}`;
-      const denLatex = incognita === "V2" ? `${density2} \\times ${a2!.toFixed(6)}` : incognita === "V1" ? `${density1} \\times ${a1!.toFixed(6)}` : incognita === "A1" ? `${density1} \\times ${v1}` : `${density2} \\times ${v2}`;
-      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{\\text{numerador}}{\\text{denominador}}`, substitution: `${incLatex} = \\frac{${numLatex}}{${denLatex}}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{\\text{numerador}}{\\text{denominador}}`, substitution: `${incLatex} = ${solved.toFixed(6)}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     } else {
       steps.push({ label: "Equação da Continuidade (Incompressível)", type: "formula", formula: `A_1 \\cdot V_1 = A_2 \\cdot V_2 \\quad \\Rightarrow \\quad Q = \\text{constante}`, result: "Para fluido incompressível, a vazão volumétrica é conservada." });
       switch (incognita) {
@@ -92,13 +92,11 @@ export default function ContinuidadePage() {
         default: return;
       }
       const incLatex = incognita.replace("V", "V_").replace("A", "A_");
-      const numLatex = incognita === "V2" ? `${a1!.toFixed(6)} \\times ${v1}` : incognita === "V1" ? `${a2!.toFixed(6)} \\times ${v2}` : incognita === "A1" ? `${a2!.toFixed(6)} \\times ${v2}` : `${a1!.toFixed(6)} \\times ${v1}`;
-      const denLatex = incognita === "V2" ? `${a2!.toFixed(6)}` : incognita === "V1" ? `${a1!.toFixed(6)}` : incognita === "A1" ? `${v1}` : `${v2}`;
-      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{A \\cdot V}{\\ldots}`, substitution: `${incLatex} = \\frac{${numLatex}}{${denLatex}}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
+      steps.push({ label: `Isolando ${incognita}`, type: "substitution", formula: `${incLatex} = \\frac{A \\cdot V}{\\ldots}`, substitution: `${incLatex} = ${solved.toFixed(6)}`, result: `${incognita} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"}` });
     }
 
     const Q = a1! * (incognita === "V1" ? solved : v1);
-    steps.push({ label: "Vazão Volumétrica", type: "calculation", formula: `Q = A \\cdot V`, substitution: `Q = ${a1!.toFixed(6)} \\times ${incognita === "V1" ? solved.toFixed(6) : v1}`, result: `Q = ${Q.toFixed(6)} m³/s` });
+    steps.push({ label: "Vazão Volumétrica", type: "calculation", formula: `Q = A \\cdot V`, result: `Q = ${Q.toFixed(6)} m³/s` });
     steps.push({ label: "Resultado Final", type: "result", result: `${solvedLabel!} = ${solved.toFixed(6)} ${incognita.startsWith("V") ? "m/s" : "m²"} | Vazão Q = ${Q.toFixed(6)} m³/s` });
 
     setResult({ value: solved, label: solvedLabel!, steps });
@@ -132,21 +130,21 @@ export default function ContinuidadePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {mode === "diametro" ? (
           <>
-            {incognita !== "A1" && <InputField label="Diâmetro D₁" unit="m" value={D1} onChange={(v) => { setD1(v); clearError("D1"); }} error={errors.D1} />}
-            {incognita !== "A2" && <InputField label="Diâmetro D₂" unit="m" value={D2} onChange={(v) => { setD2(v); clearError("D2"); }} error={errors.D2} />}
+            {incognita !== "A1" && <InputField label="Diâmetro D₁" unit="m" value={D1} onChange={(v) => { setD1(v); clearError("D1"); }} error={errors.D1} unitGroup="length" onUnitFactorChange={(f) => setFactor("D1", f)} />}
+            {incognita !== "A2" && <InputField label="Diâmetro D₂" unit="m" value={D2} onChange={(v) => { setD2(v); clearError("D2"); }} error={errors.D2} unitGroup="length" onUnitFactorChange={(f) => setFactor("D2", f)} />}
           </>
         ) : (
           <>
-            {incognita !== "A1" && <InputField label="Área A₁" unit="m²" value={A1} onChange={(v) => { setA1(v); clearError("A1"); }} error={errors.A1} />}
-            {incognita !== "A2" && <InputField label="Área A₂" unit="m²" value={A2} onChange={(v) => { setA2(v); clearError("A2"); }} error={errors.A2} />}
+            {incognita !== "A1" && <InputField label="Área A₁" unit="m²" value={A1} onChange={(v) => { setA1(v); clearError("A1"); }} error={errors.A1} unitGroup="area" onUnitFactorChange={(f) => setFactor("A1", f)} />}
+            {incognita !== "A2" && <InputField label="Área A₂" unit="m²" value={A2} onChange={(v) => { setA2(v); clearError("A2"); }} error={errors.A2} unitGroup="area" onUnitFactorChange={(f) => setFactor("A2", f)} />}
           </>
         )}
-        {incognita !== "V1" && <InputField label="Velocidade V₁" unit="m/s" value={V1} onChange={(v) => { setV1(v); clearError("V1"); }} error={errors.V1} />}
-        {incognita !== "V2" && <InputField label="Velocidade V₂" unit="m/s" value={V2} onChange={(v) => { setV2(v); clearError("V2"); }} error={errors.V2} />}
+        {incognita !== "V1" && <InputField label="Velocidade V₁" unit="m/s" value={V1} onChange={(v) => { setV1(v); clearError("V1"); }} error={errors.V1} unitGroup="velocity" onUnitFactorChange={(f) => setFactor("V1", f)} />}
+        {incognita !== "V2" && <InputField label="Velocidade V₂" unit="m/s" value={V2} onChange={(v) => { setV2(v); clearError("V2"); }} error={errors.V2} unitGroup="velocity" onUnitFactorChange={(f) => setFactor("V2", f)} />}
         {compressivel && (
           <>
-            <InputField label="Densidade ρ₁" unit="kg/m³" value={rho1} onChange={(v) => { setRho1(v); clearError("rho1"); }} error={errors.rho1} />
-            <InputField label="Densidade ρ₂" unit="kg/m³" value={rho2} onChange={(v) => { setRho2(v); clearError("rho2"); }} error={errors.rho2} />
+            <InputField label="Densidade ρ₁" unit="kg/m³" value={rho1} onChange={(v) => { setRho1(v); clearError("rho1"); }} error={errors.rho1} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho1", f)} />
+            <InputField label="Densidade ρ₂" unit="kg/m³" value={rho2} onChange={(v) => { setRho2(v); clearError("rho2"); }} error={errors.rho2} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho2", f)} />
           </>
         )}
       </div>
