@@ -19,6 +19,8 @@ export default function ReynoldsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ re: number; classification: string; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -32,10 +34,10 @@ export default function ReynoldsPage() {
 
   const calculate = () => {
     if (!validate()) return;
-    const density = parseFloat(rho);
-    const velocity = parseFloat(v);
-    const diameter = parseFloat(d);
-    const viscosity = parseFloat(mu);
+    const density = parseFloat(rho) * (factors.rho || 1);
+    const velocity = parseFloat(v) * (factors.v || 1);
+    const diameter = parseFloat(d) * (factors.d || 1);
+    const viscosity = parseFloat(mu) * (factors.mu || 1);
 
     const re = (density * velocity * diameter) / viscosity;
     const classification = classifyReynolds(re);
@@ -62,10 +64,10 @@ export default function ReynoldsPage() {
       <FluidPresets onSelect={(r, m) => { setRho(r); setMu(m); }} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} />
-        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(v2) => { setV(v2); setErrors((e) => ({ ...e, v: "" })); }} error={errors.v} />
-        <InputField label="Diâmetro (D)" unit="m" value={d} onChange={(v3) => { setD(v3); setErrors((e) => ({ ...e, d: "" })); }} error={errors.d} />
-        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v4) => { setMu(v4); setErrors((e) => ({ ...e, mu: "" })); }} error={errors.mu} />
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho", f)} />
+        <InputField label="Velocidade (v)" unit="m/s" value={v} onChange={(v2) => { setV(v2); setErrors((e) => ({ ...e, v: "" })); }} error={errors.v} unitGroup="velocity" onUnitFactorChange={(f) => setFactor("v", f)} />
+        <InputField label="Diâmetro (D)" unit="m" value={d} onChange={(v3) => { setD(v3); setErrors((e) => ({ ...e, d: "" })); }} error={errors.d} unitGroup="length" onUnitFactorChange={(f) => setFactor("d", f)} />
+        <InputField label="Viscosidade (μ)" unit="Pa·s" value={mu} onChange={(v4) => { setMu(v4); setErrors((e) => ({ ...e, mu: "" })); }} error={errors.mu} unitGroup="viscosity" onUnitFactorChange={(f) => setFactor("mu", f)} />
       </div>
 
       <button onClick={calculate} className="bg-primary text-primary-foreground font-heading text-sm uppercase tracking-wider px-8 py-3 border-none cursor-pointer mb-8">

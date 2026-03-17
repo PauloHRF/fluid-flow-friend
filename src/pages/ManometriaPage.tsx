@@ -21,6 +21,8 @@ export default function ManometriaPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ deltaP: number; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const g = 9.81;
 
@@ -40,21 +42,32 @@ export default function ManometriaPage() {
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
-    const layerSummary = layers.map((l, i) => `Camada ${i+1}: ρ=${l.rho} kg/m³, h=${l.h} m, ${l.direction === "desce" ? "↓ desce" : "↑ sobe"}`).join(" | ");
+    const layerSummary = layers.map((l, i) => {
+      const rho = parseFloat(l.rho) * (factors[`${l.id}-rho`] || 1);
+      const h = parseFloat(l.h) * (factors[`${l.id}-h`] || 1);
+      return `Camada ${i+1}: ρ=${rho.toFixed(2)} kg/m³, h=${h.toFixed(4)} m, ${l.direction === "desce" ? "↓ desce" : "↑ sobe"}`;
+    }).join(" | ");
     const steps: any[] = [
       { label: "Dados de Entrada", type: "info", result: layerSummary },
       { label: "Lei de Stevin", type: "formula", formula: `\\Delta P = \\rho \\cdot g \\cdot h`, result: "A pressão varia linearmente com a profundidade em um fluido estático." },
     ];
     let deltaP = 0;
     layers.forEach((layer, i) => {
-      const rho = parseFloat(layer.rho); const h = parseFloat(layer.h);
+      const rho = parseFloat(layer.rho) * (factors[`${layer.id}-rho`] || 1);
+      const h = parseFloat(layer.h) * (factors[`${layer.id}-h`] || 1);
       const contrib = rho * g * h;
       const sign = layer.direction === "desce" ? 1 : -1;
       deltaP += sign * contrib;
       const signSymbol = sign > 0 ? "+" : "-";
-      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, type: "substitution", formula: `\\Delta P_{${i+1}} = ${signSymbol} \\, \\rho \\cdot g \\cdot h`, substitution: `\\Delta P_{${i+1}} = ${signSymbol} \\, ${rho} \\times ${g} \\times ${h} = ${signSymbol} \\, ${contrib.toFixed(2)} \\text{ Pa}`, result: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
+      steps.push({ label: `Camada ${i + 1} (${layer.direction === "desce" ? "↓ desce" : "↑ sobe"})`, type: "substitution", formula: `\\Delta P_{${i+1}} = ${signSymbol} \\, \\rho \\cdot g \\cdot h`, substitution: `\\Delta P_{${i+1}} = ${signSymbol} \\, ${rho.toFixed(2)} \\times ${g} \\times ${h.toFixed(4)} = ${signSymbol} \\, ${contrib.toFixed(2)} \\text{ Pa}`, result: `ΔP_${i+1} = ${sign > 0 ? "+" : "−"} ${contrib.toFixed(2)} Pa` });
     });
-    const sumExpr = layers.map((layer, i) => { const rho = parseFloat(layer.rho); const h = parseFloat(layer.h); const contrib = rho * g * h; const sign = layer.direction === "desce" ? "+" : "-"; return `${sign} ${contrib.toFixed(2)}`; }).join(" ");
+    const sumExpr = layers.map((layer) => {
+      const rho = parseFloat(layer.rho) * (factors[`${layer.id}-rho`] || 1);
+      const h = parseFloat(layer.h) * (factors[`${layer.id}-h`] || 1);
+      const contrib = rho * g * h;
+      const sign = layer.direction === "desce" ? "+" : "-";
+      return `${sign} ${contrib.toFixed(2)}`;
+    }).join(" ");
     steps.push({ label: "Soma das Contribuições", type: "calculation", formula: `\\Delta P = ${sumExpr}`, result: `ΔP = ${deltaP.toFixed(2)} Pa` });
     steps.push({ label: "Resultado Final", type: "result", result: `ΔP = ${deltaP.toFixed(2)} Pa = ${(deltaP / 1000).toFixed(4)} kPa` });
 
@@ -74,8 +87,8 @@ export default function ManometriaPage() {
               {layers.length > 1 && <button onClick={() => removeLayer(layer.id)} className="text-xs font-heading text-destructive cursor-pointer uppercase tracking-wider">Remover</button>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <InputField label="Densidade (ρ)" unit="kg/m³" value={layer.rho} onChange={(val) => updateLayer(layer.id, "rho", val)} error={errors[`${layer.id}-rho`]} />
-              <InputField label="Altura (h)" unit="m" value={layer.h} onChange={(val) => updateLayer(layer.id, "h", val)} error={errors[`${layer.id}-h`]} />
+              <InputField label="Densidade (ρ)" unit="kg/m³" value={layer.rho} onChange={(val) => updateLayer(layer.id, "rho", val)} error={errors[`${layer.id}-rho`]} unitGroup="density" onUnitFactorChange={(f) => setFactor(`${layer.id}-rho`, f)} />
+              <InputField label="Altura (h)" unit="m" value={layer.h} onChange={(val) => updateLayer(layer.id, "h", val)} error={errors[`${layer.id}-h`]} unitGroup="length" onUnitFactorChange={(f) => setFactor(`${layer.id}-h`, f)} />
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-heading text-foreground uppercase tracking-wider">Direção</label>
                 <select value={layer.direction} onChange={(e) => updateLayer(layer.id, "direction", e.target.value)} className="border border-input bg-background px-3 py-2 text-sm font-heading text-foreground focus:border-primary focus:outline-none">

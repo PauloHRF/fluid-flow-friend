@@ -16,6 +16,11 @@ const fieldLabels: Record<Field, { label: string; unit: string }> = {
   hL: { label: "Perda de Carga hL", unit: "m" },
 };
 
+const fieldUnitGroups: Record<Field, string> = {
+  P1: "pressure", v1: "velocity", z1: "length",
+  P2: "pressure", v2: "velocity", z2: "length", hL: "length",
+};
+
 const allFields: Field[] = ["P1", "v1", "z1", "P2", "v2", "z2", "hL"];
 
 export default function BernoulliPage() {
@@ -27,6 +32,8 @@ export default function BernoulliPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<{ value: number; label: string; steps: any[] } | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const g = 9.81;
 
@@ -36,7 +43,7 @@ export default function BernoulliPage() {
   };
 
   const calculate = () => {
-    const rho = parseFloat(rhoInput);
+    const rho = parseFloat(rhoInput) * (factors.rho || 1);
     const e: Record<string, string> = {};
     if (isNaN(rho) || rho <= 0) e.rho = "Deve ser > 0";
 
@@ -45,7 +52,7 @@ export default function BernoulliPage() {
       if (f === incognita) continue;
       const n = parseFloat(values[f]);
       if (isNaN(n)) { e[f] = "Campo obrigatório"; continue; }
-      nums[f] = n;
+      nums[f] = n * (factors[f] || 1);
     }
 
     setErrors(e);
@@ -76,11 +83,11 @@ export default function BernoulliPage() {
     const fieldLatex: Record<Field, string> = { P1: "P_1", v1: "v_1", z1: "z_1", P2: "P_2", v2: "v_2", z2: "z_2", hL: "h_L" };
 
     const steps = [
-      { label: "Dados de Entrada", type: "info" as const, result: knownFields.map((f) => `${f} = ${values[f]} ${fieldLabels[f].unit}`).join(" | ") },
+      { label: "Dados de Entrada", type: "info" as const, result: knownFields.map((f) => `${f} = ${nums[f]!.toFixed(4)} ${fieldLabels[f].unit}`).join(" | ") },
       { label: "Equação de Bernoulli Generalizada", type: "formula" as const, formula: `\\frac{P_1}{\\rho g} + \\frac{v_1^2}{2g} + z_1 = \\frac{P_2}{\\rho g} + \\frac{v_2^2}{2g} + z_2 + h_L`, result: `Conservação de energia ao longo de uma linha de corrente, com ρ = ${rho} kg/m³ e g = ${g} m/s²` },
       { label: "Identificação da Incógnita", type: "info" as const, result: `Variável a determinar: ${incognita} (${fieldLabels[incognita].label})` },
-      { label: "Substituição — Lado Esquerdo (Ponto 1)", type: "substitution" as const, formula: `H_1 = \\frac{P_1}{\\rho g} + \\frac{v_1^2}{2g} + z_1`, substitution: incognita.endsWith("1") ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${values.P1 || "?"}}{${rho} \\times ${g}} + \\frac{${values.v1 || "?"}^2}{2 \\times ${g}} + ${values.z1 || "?"}`, result: incognita.endsWith("1") ? `Contém a incógnita ${incognita}` : `Lado esquerdo com valores conhecidos` },
-      { label: "Substituição — Lado Direito (Ponto 2)", type: "substitution" as const, formula: `H_2 = \\frac{P_2}{\\rho g} + \\frac{v_2^2}{2g} + z_2 + h_L`, substitution: incognita.endsWith("2") || incognita === "hL" ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${values.P2 || "?"}}{${rho} \\times ${g}} + \\frac{${values.v2 || "?"}^2}{2 \\times ${g}} + ${values.z2 || "?"} + ${values.hL || "0"}`, result: incognita.endsWith("2") || incognita === "hL" ? `Contém a incógnita ${incognita}` : `Lado direito com valores conhecidos` },
+      { label: "Substituição — Lado Esquerdo (Ponto 1)", type: "substitution" as const, formula: `H_1 = \\frac{P_1}{\\rho g} + \\frac{v_1^2}{2g} + z_1`, substitution: incognita.endsWith("1") ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${nums.P1}}{${rho} \\times ${g}} + \\frac{${nums.v1}^2}{2 \\times ${g}} + ${nums.z1}`, result: incognita.endsWith("1") ? `Contém a incógnita ${incognita}` : `Lado esquerdo com valores conhecidos` },
+      { label: "Substituição — Lado Direito (Ponto 2)", type: "substitution" as const, formula: `H_2 = \\frac{P_2}{\\rho g} + \\frac{v_2^2}{2g} + z_2 + h_L`, substitution: incognita.endsWith("2") || incognita === "hL" ? `\\text{Contém a incógnita } ${fieldLatex[incognita]}` : `\\frac{${nums.P2}}{${rho} \\times ${g}} + \\frac{${nums.v2}^2}{2 \\times ${g}} + ${nums.z2} + ${nums.hL ?? 0}`, result: incognita.endsWith("2") || incognita === "hL" ? `Contém a incógnita ${incognita}` : `Lado direito com valores conhecidos` },
       { label: "Isolamento e Resolução", type: "calculation" as const, formula: `${fieldLatex[incognita]} = \\text{?}`, result: `${incognita} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
       { label: "Resultado Final", type: "result" as const, result: `${fieldLabels[incognita].label} = ${solved.toFixed(4)} ${fieldLabels[incognita].unit}` },
     ];
@@ -98,14 +105,14 @@ export default function BernoulliPage() {
             {allFields.map((f) => <option key={f} value={f}>{fieldLabels[f].label}</option>)}
           </select>
         </div>
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rhoInput} onChange={(v) => { setRhoInput(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} />
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rhoInput} onChange={(v) => { setRhoInput(v); setErrors((e) => ({ ...e, rho: "" })); }} error={errors.rho} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho", f)} />
       </div>
 
       <p className="text-xs font-body text-muted-foreground mb-4">g = 9.81 m/s²</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {allFields.map((f) => (
-          <InputField key={f} label={fieldLabels[f].label} unit={fieldLabels[f].unit} value={f === incognita ? "" : values[f]} onChange={(val) => update(f, val)} disabled={f === incognita} error={errors[f]} />
+          <InputField key={f} label={fieldLabels[f].label} unit={fieldLabels[f].unit} value={f === incognita ? "" : values[f]} onChange={(val) => update(f, val)} disabled={f === incognita} error={errors[f]} unitGroup={fieldUnitGroups[f]} onUnitFactorChange={(factor) => setFactor(f, factor)} />
         ))}
       </div>
 

@@ -13,6 +13,8 @@ export default function NPSHPage() {
   const [rho, setRho] = useState("1000");
   const [NPSHr, setNPSHr] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [factors, setFactors] = useState<Record<string, number>>({});
+  const setFactor = (key: string, factor: number) => setFactors((prev) => ({ ...prev, [key]: factor }));
 
   const [result, setResult] = useState<{
     npshd: number;
@@ -36,12 +38,12 @@ export default function NPSHPage() {
     setErrors(e);
     if (Object.keys(e).length > 0) return;
 
-    const patm = parseFloat(Patm);
-    const pvap = parseFloat(Pvapor);
-    const hs = parseFloat(hSuccao);
-    const hp = parseFloat(hPerdas);
-    const vs = parseFloat(vSuccao);
-    const density = parseFloat(rho);
+    const patm = parseFloat(Patm) * (factors.Patm || 1);
+    const pvap = parseFloat(Pvapor) * (factors.Pvapor || 1);
+    const hs = parseFloat(hSuccao) * (factors.hSuccao || 1);
+    const hp = parseFloat(hPerdas) * (factors.hPerdas || 1);
+    const vs = parseFloat(vSuccao) * (factors.vSuccao || 1);
+    const density = parseFloat(rho) * (factors.rho || 1);
     const npshr = parseFloat(NPSHr);
     const hasNPSHr = !isNaN(npshr) && npshr > 0;
 
@@ -79,12 +81,12 @@ export default function NPSHPage() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <InputField label="Pressão Atmosférica" unit="Pa" value={Patm} onChange={(v) => { setPatm(v); clearError("Patm"); }} error={errors.Patm} />
-        <InputField label="Pressão de Vapor" unit="Pa" value={Pvapor} onChange={(v) => { setPvapor(v); clearError("Pvapor"); }} error={errors.Pvapor} />
-        <InputField label="Altura de Sucção (hs)" unit="m" value={hSuccao} onChange={(v) => { setHSuccao(v); clearError("hSuccao"); }} error={errors.hSuccao} />
-        <InputField label="Perdas na Sucção (hperdas)" unit="m" value={hPerdas} onChange={(v) => { setHPerdas(v); clearError("hPerdas"); }} error={errors.hPerdas} />
-        <InputField label="Velocidade na Sucção" unit="m/s" value={vSuccao} onChange={(v) => { setVSuccao(v); clearError("vSuccao"); }} error={errors.vSuccao} />
-        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); clearError("rho"); }} error={errors.rho} />
+        <InputField label="Pressão Atmosférica" unit="Pa" value={Patm} onChange={(v) => { setPatm(v); clearError("Patm"); }} error={errors.Patm} unitGroup="pressure" onUnitFactorChange={(f) => setFactor("Patm", f)} />
+        <InputField label="Pressão de Vapor" unit="Pa" value={Pvapor} onChange={(v) => { setPvapor(v); clearError("Pvapor"); }} error={errors.Pvapor} unitGroup="pressure" onUnitFactorChange={(f) => setFactor("Pvapor", f)} />
+        <InputField label="Altura de Sucção (hs)" unit="m" value={hSuccao} onChange={(v) => { setHSuccao(v); clearError("hSuccao"); }} error={errors.hSuccao} unitGroup="length" onUnitFactorChange={(f) => setFactor("hSuccao", f)} />
+        <InputField label="Perdas na Sucção (hperdas)" unit="m" value={hPerdas} onChange={(v) => { setHPerdas(v); clearError("hPerdas"); }} error={errors.hPerdas} unitGroup="length" onUnitFactorChange={(f) => setFactor("hPerdas", f)} />
+        <InputField label="Velocidade na Sucção" unit="m/s" value={vSuccao} onChange={(v) => { setVSuccao(v); clearError("vSuccao"); }} error={errors.vSuccao} unitGroup="velocity" onUnitFactorChange={(f) => setFactor("vSuccao", f)} />
+        <InputField label="Densidade (ρ)" unit="kg/m³" value={rho} onChange={(v) => { setRho(v); clearError("rho"); }} error={errors.rho} unitGroup="density" onUnitFactorChange={(f) => setFactor("rho", f)} />
         <InputField label="NPSH Requerido (fabricante)" unit="m" value={NPSHr} onChange={setNPSHr} />
       </div>
 
