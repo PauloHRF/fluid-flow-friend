@@ -25,6 +25,7 @@ const App = () => (
           <Route path="/continuidade" element={<ContinuidadePage />} />
           <Route path="/manometria" element={<ManometriaPage />} />
           <Route path="/empuxo" element={<EmpuxoPage />} />
+          <Route path="/comportas" element={<ComportasPage />} />
           <Route path="/npsh" element={<NPSHPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

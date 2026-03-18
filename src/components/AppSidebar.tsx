@@ -12,6 +12,7 @@ const calculators = [
   { title: "Equação da Continuidade", path: "/continuidade" },
   { title: "Manometria (Stevin)", path: "/manometria" },
   { title: "Empuxo (Arquimedes)", path: "/empuxo" },
+  { title: "Comportas (Superfícies Planas)", path: "/comportas" },
   { title: "NPSH e Cavitação", path: "/npsh" },
 ];
 
