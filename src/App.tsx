@@ -8,6 +8,7 @@ import DarcyWeisbachPage from "@/pages/DarcyWeisbachPage";
 import ContinuidadePage from "@/pages/ContinuidadePage";
 import ManometriaPage from "@/pages/ManometriaPage";
 import EmpuxoPage from "@/pages/EmpuxoPage";
+import ComportasPage from "@/pages/ComportasPage";
 import NPSHPage from "@/pages/NPSHPage";
 import NotFound from "@/pages/NotFound";
 
