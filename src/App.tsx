@@ -8,6 +8,7 @@ import DarcyWeisbachPage from "@/pages/DarcyWeisbachPage";
 import ContinuidadePage from "@/pages/ContinuidadePage";
 import ManometriaPage from "@/pages/ManometriaPage";
 import EmpuxoPage from "@/pages/EmpuxoPage";
+import ComportasPage from "@/pages/ComportasPage";
 import NPSHPage from "@/pages/NPSHPage";
 import NotFound from "@/pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/continuidade" element={<ContinuidadePage />} />
           <Route path="/manometria" element={<ManometriaPage />} />
           <Route path="/empuxo" element={<EmpuxoPage />} />
+          <Route path="/comportas" element={<ComportasPage />} />
           <Route path="/npsh" element={<NPSHPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
